@@ -78,7 +78,7 @@ $(document).ready(function(){
 	{
 		ctx.fillStyle = "green";
 		ctx.fillRect(x*cw, y*cw, cw, cw);
-		ctx.strokeStyle = ["white","red","blue","yellow","pink","black","gray","brown"][Math.floor(Math.random()*8)];;
+		ctx.strokeStyle = ["white","green"][Math.floor(Math.random()*2)];;
 		ctx.strokeRect(x*cw, y*cw, cw, cw);
 	}
   function check_collision(x, y, array)
