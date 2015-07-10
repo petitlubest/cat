@@ -6,7 +6,7 @@ $(document).ready(function(){
 	var ctx = canvas.getContext("2d");
 	var w = $("#canvas").width();
 	var h = $("#canvas").height();
-	var cw = 10;
+	var cw = 50;
 	var d;
 	var food;
 	var score;
