@@ -6,7 +6,7 @@ $(document).ready(function(){
 	var ctx = canvas.getContext("2d");
 	var w = $("#canvas").width();
 	var h = $("#canvas").height();
-	var cw = 50;
+	var cw = 20;
 	var d;
 	var food;
 	var score;
@@ -33,8 +33,8 @@ $(document).ready(function(){
 	function create_food()
 	{
 		food = {
-			x: Math.round(Math.random()*(w-cw)/cw), 
-			y: Math.round(Math.random()*(h-cw)/cw), 
+			x: Math.round(Math.random()*(w-cw)/cw),
+			y: Math.round(Math.random()*(h-cw)/cw),
 		};
 	}
 	function paint()
@@ -69,20 +69,19 @@ $(document).ready(function(){
 			var c = snake_array[i];
 			paint_cell(c.x, c.y);
 		}
-		
+
 		paint_cell(food.x, food.y);
 		var score_text = "Score: " + score;
 		ctx.fillText(score_text, 5, h-5);
 	}
 	function paint_cell(x, y)
 	{
-		ctx.fillStyle = ["green","red","blue","yellow","pink","black","gray","brown"][Math.floor(Math.random()*8)];;
+		ctx.fillStyle = "green";
 		ctx.fillRect(x*cw, y*cw, cw, cw);
-		ctx.strokeStyle = "white";
+		ctx.strokeStyle = ["white","red","blue","yellow","pink","black","gray","brown"][Math.floor(Math.random()*8)];;
 		ctx.strokeRect(x*cw, y*cw, cw, cw);
 	}
-	
-	function check_collision(x, y, array)
+  function check_collision(x, y, array)
 	{
 		for(var i = 0; i < array.length; i++)
 		{
