@@ -25,12 +25,18 @@
   </style>
   <script>
     $(function(){
+      var max = 1;
       var state = "stop";
       var running_number;
       var count_down;
+      var hit = [];
       $(".container").click(function(){
         if (state == "stop") {
-          state = "running";
+          if (hit.length == max) {
+            $(".container").html("!!!");
+          } else {
+            state = "running";
+          }
           $(".container").css("color", "#ecf0f1");
         } else if (state == "running") {
           state = "slowdown";
@@ -40,7 +46,7 @@
         }
         if (state == "running") {
           running_number = setInterval(function(){
-            $(".container").html(Math.floor(Math.random()*30)+11); 
+            $(".container").html(random_number(max)); 
           }, 40);
         }
         if (state == "slowdown") {
@@ -50,14 +56,24 @@
       });
 
       function slowDown() {
-          $(".container").html(Math.floor(Math.random()*30)+11);
+          $(".container").html(random_number(max));
           count_down *= 1.5;
           if (count_down > 2000) {
             $(".container").css("color", "#e74c3c");
-            state = "stop"
+            hit.push(parseInt($(".container").html()));
+            state = "stop";
           } else {
             setTimeout(slowDown, count_down);   
           }
+      }
+
+      function random_number(max) {
+        var number;
+        do {
+          number = Math.floor(Math.random()*max)+1;
+        } while ($.inArray(number, hit) != -1);
+        if (number < 10) {number = "0" + number};
+        return number;
       }
     });
   </script>
