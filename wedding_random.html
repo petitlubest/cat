@@ -24,40 +24,42 @@
     }
   </style>
   <script>
-    var state = "stop";
-    var running_number;
-    var count_down;
-    $(".container").click(function(){
-      if (state == "stop") {
-        state = "running";
-        $(".container").css("color", "#ecf0f1");
-      } else if (state == "running") {
-        state = "slowdown";
-        clearInterval(running_number);
-      } else {
-        return;
-      }
-      if (state == "running") {
-        running_number = setInterval(function(){
-          $(".container").html(Math.floor(Math.random()*30)+11); 
-        }, 40);
-      }
-      if (state == "slowdown") {
-        count_down = 40;
-        slowDown();
+    $(function(){
+      var state = "stop";
+      var running_number;
+      var count_down;
+      $(".container").click(function(){
+        if (state == "stop") {
+          state = "running";
+          $(".container").css("color", "#ecf0f1");
+        } else if (state == "running") {
+          state = "slowdown";
+          clearInterval(running_number);
+        } else {
+          return;
+        }
+        if (state == "running") {
+          running_number = setInterval(function(){
+            $(".container").html(Math.floor(Math.random()*30)+11); 
+          }, 40);
+        }
+        if (state == "slowdown") {
+          count_down = 40;
+          slowDown();
+        }
+      });
+
+      function slowDown() {
+          $(".container").html(Math.floor(Math.random()*30)+11);
+          count_down *= 1.5;
+          if (count_down > 2000) {
+            $(".container").css("color", "#e74c3c");
+            state = "stop"
+          } else {
+            setTimeout(slowDown, count_down);   
+          }
       }
     });
-
-    function slowDown() {
-        $(".container").html(Math.floor(Math.random()*30)+11);
-        count_down *= 1.5;
-        if (count_down > 2000) {
-          $(".container").css("color", "#e74c3c");
-          state = "stop"
-        } else {
-          setTimeout(slowDown, count_down);   
-        }
-    }
   </script>
 </head>
 <body>
