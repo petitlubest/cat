@@ -5,10 +5,11 @@
       var state;
       document.addEventListener("DOMContentLoaded", function(event) {
         // Player moves & status init
+        var PLAYER_NUMBER = 1
         var STATUS = {"STABLE":"1", "UNSTABLE":"2"}
         var PLAYER_MOVES = {"EMPTY":"0"}
         var count = 1
-        for (var i = 1; i<=4; i++) {
+        for (var i = 1; i<=PLAYER_NUMBER; i++) {
           PLAYER_MOVES[i+STATUS["STABLE"]] = count++ + "";
           PLAYER_MOVES[i+STATUS["UNSTABLE"]] = count++ + "";
         }
@@ -98,10 +99,9 @@
         }
 
         // DEMO FOR SERVER SIDE
-        var player_no = 2;
-        current_positions = [[0, 0],[10, 10],[0, 0],[0, 0]];
+        var player_no = 1;
+        current_positions[player_no-1] = [10, 10];
         state[10][10] = PLAYER_MOVES[player_no + "1"];
-        state[11][11] = PLAYER_MOVES["11"];
         draw();
         
         document.addEventListener("keydown", function(event) {
@@ -142,8 +142,11 @@
           }
           for (var i = 0; i < HEIGHT/UNIT; i++) {
             for (var j = 0; j < WIDTH/UNIT; j++) {
-              if (check_point_inside(i, j)) {
-                state[i][j] = PLAYER_MOVES[player_no + STATUS["STABLE"]];
+              if (state[i][j] != PLAYER_MOVES[player_no + STATUS["STABLE"]]) {
+                if (check_point_inside(i, j)) {
+                  console.log("recursion_fill " + i + " " + j);
+                  recursion_fill(i, j);
+                }
               }
             }
           }
@@ -158,8 +161,17 @@
               }
             }
           }
-          // console.log(result);
           return result;
+        }
+
+        function recursion_fill(i, j) {
+          state[i][j] = PLAYER_MOVES[player_no + STATUS["STABLE"]];
+          var positions = position_around(i, j);
+          for (var i = 0; i < positions.length; i++) {
+            if (state[positions[i][0]][positions[i][1]] != PLAYER_MOVES[player_no + STATUS["STABLE"]]) {
+              recursion_fill(positions[i][0],positions[i][1]);
+            }
+          }
         }
 
         function recursion_check(i, j) {
@@ -171,10 +183,13 @@
             return true;
           }
           state[i][j] = state[i][j] + "TEMP";
-          if (!recursion_check(i+1, j) || !recursion_check(i+1, j+1) || !recursion_check(i, j+1) || !recursion_check(i-1, j+1) || !recursion_check(i-1, j) || !recursion_check(i-1, j-1) || !recursion_check(i, j-1) || !recursion_check(i+1, j-1)) {
-            return false
+          var positions = position_around(i, j);
+          for (var i = 0; i < positions.length; i++) {
+            if (!recursion_check(positions[i][0], positions[i][1])) {
+              return false;
+            }
           }
-          return true
+          return true;
         }
 
         function check_unvalid_position(position) {
@@ -182,6 +197,10 @@
             return true;
           }
           return false;
+        }
+
+        function position_around(i, j) {
+          return [[i+1, j],[i+1, j+1],[i, j+1],[i-1, j+1],[i-1, j],[i-1, j-1], [i, j-1],[i+1, j-1]];
         }
       });
     </script>
