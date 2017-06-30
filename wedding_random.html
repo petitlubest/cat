@@ -1,86 +1,187 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <script src="https://cdn.rawgit.com/konvajs/konva/1.6.3/konva.min.js"></script>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width">
-  <title>Number Genarator</title>
-  <script
-  src="https://code.jquery.com/jquery-3.1.1.min.js"
-  integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
-  crossorigin="anonymous"></script>
+  <title>Matrix</title>
   <style>
-    body {
-      background-color: #2c3e50;
+    .stage_player {
+      width: 700px;
+      height: 500px;
+      border: 1px solid #ecf0f1;
+      background-color: #ecf0f1;
+      margin: 30px auto 30px auto;
     }
-
-    .container {
-      padding-top: 100px;
-      text-align: center;
-      color: #ecf0f1;
-      font-size: 600px;
-      cursor: pointer;
-      font-family: "Papyrus";
-      -webkit-user-select: none;
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #34495e;
     }
   </style>
-  <script>
-    $(function(){
-      var max = 35;
-      var state = "stop";
-      var running_number;
-      var count_down;
-      var hit = [];
-      $(".container").click(function(){
-        if (state == "stop") {
-          if (hit.length == max) {
-            $(".container").html("!!!");
-          } else {
-            state = "running";
-          }
-          $(".container").css("color", "#ecf0f1");
-        } else if (state == "running") {
-          state = "slowdown";
-          clearInterval(running_number);
-        } else {
-          return;
-        }
-        if (state == "running") {
-          running_number = setInterval(function(){
-            $(".container").html(random_number(max)); 
-          }, 40);
-        }
-        if (state == "slowdown") {
-          count_down = 40;
-          slowDown();
-        }
-      });
-
-      function slowDown() {
-          $(".container").html(random_number(max));
-          count_down *= 1.5;
-          if (count_down > 2000) {
-            $(".container").css("color", "#2ecc71");
-            hit.push(parseInt($(".container").html()));
-            state = "stop";
-          } else {
-            setTimeout(slowDown, count_down);   
-          }
-      }
-
-      function random_number(max) {
-        var number;
-        do {
-          number = Math.floor(Math.random()*max)+1;
-        } while ($.inArray(number, hit) != -1);
-        if (number < 10) {number = "0" + number};
-        return number;
-      }
-    });
-  </script>
 </head>
 <body>
-  <div class="container">
-    !!!
-  </div>
-</body>
+  <div id="stage_player_1" class="stage_player"></div>
+  <div id="stage_player_2" class="stage_player"></div>
+  <script>
+    // Base variables
+    var number_of_players = 2;
+    var own_player_number = 1;
+
+    var STAGEWIDTH = 700;
+    var STAGEHEIGHT = 500;
+    var BASE = 50;
+
+    var NUMBER_COLOR = "#2c3e50";
+
+    // Base stages
+    for (var p_no = 1; p_no <= number_of_players; p_no++) {
+      window["stage_" + p_no] = new Konva.Stage({
+        container: "stage_player_" + p_no,
+        width: STAGEWIDTH,
+        height: STAGEHEIGHT
+      });
+      window["background_layer" + p_no] = new Konva.Layer();
+      window["number_layer_" + p_no] = new Konva.Layer();
+      for (var i = 0; i < 10; i++) {
+        window["background_layer" + p_no].add(new Konva.Line({
+          points: [100 + i * BASE, 25, 100 + i * BASE, 475],
+          stroke: NUMBER_COLOR,
+          strokeWidth: i % 3 == 0 ? 3 : 2,
+          lineCap: "round",
+          lineJoin: "round"
+        }));
+        window["background_layer" + p_no].add(new Konva.Line({
+          points: [100, 25 + i * BASE, 550, 25 + i * BASE],
+          stroke: NUMBER_COLOR,
+          strokeWidth: i % 3 == 0 ? 3 : 2,
+          lineCap: "round",
+          lineJoin: "round"
+        }));
+        if (i == 9) break;
+        for (var j = 0; j < 3; j++) {
+          window["group_" + p_no + "_" + i + "_" + j] = new Konva.Group({
+            x: 100 + i * BASE + BASE*0.5,
+            y: 25 + j * BASE * 3 + BASE*1.5,
+            visible: false
+          });
+          window["group_" + p_no + "_" + i + "_" + j].add(new Konva.Rect({
+            x: - BASE*0.5,
+            y: - BASE*1.5,
+            width: BASE,
+            height: BASE * 3,
+            fill: "#2ecc71"
+          }));
+          for (var k = 0; k < 3; k++) {
+            window["text_" + p_no + "_" + i + "_" + j + "_" + k] = new Konva.Text({
+              x: - BASE*0.5,
+              y: 10 + k * BASE - BASE*1.5,
+              width: BASE,
+              height: BASE,
+              text: "",
+              fontSize: 33,
+              fontFamily: "Calibri",
+              fill: NUMBER_COLOR,
+              fontStyle: "bold",
+              align: "center",
+              margin: "auto"
+            });
+            window["group_" + p_no + "_" + i + "_" + j].add(window["text_" + p_no + "_" + i + "_" + j + "_" + k]);
+          }
+          window["number_layer_" + p_no].add(window["group_" + p_no + "_" + i + "_" + j]);
+        }
+      }
+      window["stage_" + p_no].add(window["background_layer" + p_no]);
+      window["stage_" + p_no].add(window["number_layer_" + p_no]);
+    }
+
+    // Draging piece
+    var own_piece = new Konva.Group({
+      x: 25 + BASE*0.5,
+      y: 25 + BASE*1.5,
+      draggable: true
+    });
+    own_piece.add(new Konva.Rect({
+      x: - BASE*0.5,
+      y: - BASE*1.5,
+      width: BASE,
+      height: BASE * 3,
+      fill: "#2ecc71"
+    }));
+    for (var k = 0; k < 3; k++) {
+      window["piece_text_" + k] = new Konva.Text({
+        x: - BASE*0.5,
+        y: 10 + k * BASE - BASE*1.5,
+        width: BASE,
+        height: BASE,
+        text: "8",
+        fontSize: 33,
+        fontFamily: "Calibri",
+        fill: NUMBER_COLOR,
+        fontStyle: "bold",
+        align: "center",
+        margin: "auto"
+      });
+      own_piece.add(window["piece_text_" + k]);
+    }
+    window["number_layer_" + own_player_number].add(own_piece);
+    window["number_layer_" + own_player_number].draw();
+
+    // Additional funtions
+    function set_number_in(p_no, x, y, values) {
+      for (var k = 0; k < 3; k++) {
+        window["text_" + p_no + "_" + x + "_" + y + "_" + k].setText(values[k]);
+      }
+      window["group_" + p_no + "_" + x + "_" + y].setVisible(true);
+      window["group_" + p_no + "_" + x + "_" + y].draw();
+    }
+
+    window["stage_" + own_player_number].on('dragstart', function(evt) {
+      var target = evt.target;
+      target.setAttrs({
+        scale: {
+          x: 1.2,
+          y: 1.2
+        }
+      });
+    });
+
+    window["stage_" + own_player_number].on('dragend', function(evt) {
+      var target = evt.target;
+      var diff_x = target.x() + BASE*0.25 - 100 - BASE*0.5;
+      var diff_y = target.y() + BASE*0.25 - 25 - BASE*1.5;
+      var hit = false;
+      if(Math.round(diff_x/BASE) <= 8 && Math.round(diff_x/BASE) >=0 && Math.round(diff_y/3/BASE) <= 2 && Math.round(diff_y/3/BASE) >=0 && diff_x % BASE < BASE*0.5 && diff_y % (3*BASE) < BASE*0.5) {
+        hit = true;
+        target.setDraggable(false);
+        var target_x = Math.round(diff_x/BASE);
+        var target_y = Math.round(diff_y/3/BASE);
+      }
+      tween = new Konva.Tween({
+        node: target,
+        duration: 0.5,
+        easing: Konva.Easings.ElasticEaseOut,
+        scaleX: 1,
+        scaleY: 1,
+        x: hit ? 100 + target_x * BASE + BASE*0.5 : 25 + BASE*0.5,
+        y: hit ? 25 + target_y * BASE * 3 + BASE*1.5 : 25 + BASE*1.5,
+        onFinish: function() {
+          if(hit) {
+            set_number_in(own_player_number, target_x, target_y, [8,8,8]);
+            // target.setVisible(false);
+            target.setDraggable(true);
+            target.setX(25 + BASE*0.5);
+            target.setY(25 + BASE*1.5);
+          }
+        }
+      });
+      tween.play();
+
+    });
+  </script>
+  </body>
 </html>
+
+
+
+
+
