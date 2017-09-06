@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="https://cdn.rawgit.com/konvajs/konva/1.6.5/konva.min.js"></script>
+  <meta charset="utf-8">
+  <title>GreenMe</title>
+  <meta property="og:title" content="GreenMe - Heasygame" />
+  <meta property="og:image" content="http://games.heasygame.com/assets/greenme-5b47d50ea87892a9799be897c32e92951e3390710ebfaf0294675eb70e6d3682.png" />
+  <style>
+    body {
+      text-align: center;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background-color: #34495e;
+      cursor: pointer;
+  -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+     -khtml-user-select: none; /* Konqueror HTML */
+       -moz-user-select: none; /* Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Non-prefixed version, currently
+                                  supported by Chrome and Opera */
+    }
+    
+    #container {
+      width: 520px;
+      height: 520px;
+      background-color: #34495e;
+      border: 5px #2c3e50 solid;
+      margin-left: auto;
+      margin-right: auto;
+      margin-top: 40px;
+    }
+
+    #info, a, .info {
+      text-align: center;
+      font-size: 20px;
+      margin-top: 20px;
+      color: #ecf0f1;
+    }
+  </style>
+</head>
+<body>
+  <div id="info"></div>
+  <button onclick="reset_level()">RESET LEVEL</button>
+  <div id="container"></div>
+  <div class="info">GreenMe is a simple logic game. The only thing you have to do is make all the dots become green. (I love green.) When you touch a circle, circles around it will be changed to another color. The color transformation is GREEN => RED => YELLOW => GREEN again. Just 3 colors. You will lose 5 points for each touch, and 100 points when reloading a level, so play carefully. Have fun!
+  <hr>
+  <a href="https://play.google.com/store/apps/details?id=air.GreenMe"><img width=100 src="https://cdn2.iconfinder.com/data/icons/social-media-8/512/playstore.png"></img></a><br>
+  <a href="https://play.google.com/store/apps/details?id=air.GreenMe">install from google play</a>
+  <script>
+    var GREEN = "#2ecc71";
+    var RED = "#e74c3c";
+    var YELLOW = "#f1c40f";
+    var NEXTCOLOR = {"GREEN": "RED", "RED": "YELLOW", "YELLOW": "GREEN"};
+    var animating = false;
+    var stage = new Konva.Stage({
+      container: "container",
+      width: 520,
+      height: 520
+    });
+    var layer = new Konva.Layer();
+    stage.add(layer);
+    var circles = new Array(5);
+    for (var i = 0; i < 5; i++) {
+      circles[i] = new Array(5);
+    }
+    var current_level = 1;
+    var current_point = 100;
+    update_info();
+    for (var i = 0; i < 5; i++) {
+      for (var j = 0; j < 5; j++) {
+        circles[i][j] = new Konva.Circle({
+          x: 60 + j*100,
+          y: 60 + i*100,
+          radius: 40,
+          fill: GREEN
+        });
+        layer.add(circles[i][j]);
+        circles[i][j].color = "GREEN";
+        circles[i][j].i = i;
+        circles[i][j].j = j;
+        circles[i][j].on("mouseup", function(event) {
+          if (animating) {
+            return;
+          } else {
+            current_point -= 5;
+            update_info();
+            animating = true;
+            ii = event.target.i;
+            jj = event.target.j;
+            flip_arround(ii, jj);
+            setTimeout(function() {
+              if (check_win()) {
+                current_point += current_level * 100;
+                current_level ++;
+                update_info();
+                random_level();
+              }
+              animating = false;
+            }, 500);
+          }
+        });
+      }
+    }
+    stage.draw();
+
+    function valid(e) {
+      return e[0] <= 4 && e[0] >= 0 && e[1] <= 4 && e[1] >= 0;
+    }
+
+    function flip_arround(ii, jj) {
+      [[ii, jj+1],[ii, jj-1],[ii+1, jj],[ii-1, jj], [ii+1, jj+1],[ii-1, jj-1],[ii+1, jj-1],[ii-1, jj+1]].forEach(function(e) {
+        if (valid(e)) {
+          flip_circle(e[0], e[1]);
+        }
+      });
+    }
+
+    function flip_circle(i, j) {
+      var target = circles[i][j];  
+      tween = new Konva.Tween({
+        node: target,
+        duration: 0.2,
+        easing: Konva.Easings.ElasticEaseOut,
+        opacity: 0
+      });
+      tween.play();
+      setTimeout(function() {
+        target.color = NEXTCOLOR[target.color];
+        target.fill(eval(target.color));
+        tween = new Konva.Tween({
+          node: target,
+          duration: 0.2,
+          easing: Konva.Easings.ElasticEaseOut,
+          opacity: 1
+        });
+        tween.play();
+      }, 200);
+    }
+
+    function check_win() {
+      for (var i = 0; i < 5; i++) {
+        for (var j = 0; j < 5; j++) {
+          if (circles[i][j].color != "GREEN") {
+            return false;
+          }
+        }
+      }
+      return true;
+    }
+
+    function update_info(){
+      document.getElementById("info").innerHTML = "Level: " + current_level + " Score: " + current_point;
+    }
+
+    function random_level() {
+      for (var i = 0; i < current_level; i++) {
+        flip_arround(Math.floor(Math.random()*5), Math.floor(Math.random()*5));
+      }
+    }
+
+    random_level();
+
+    function reset_level(){
+      current_point -= 100;
+      update_info();
+      for (var i = 0; i < 5; i++) {
+        for (var j = 0; j < 5; j++) {
+          circles[i][j].color = "GREEN";
+          circles[i][j].fill(GREEN);
+        }
+      }
+      random_level();
+    }
+  </script>
+</body>
+</html>
