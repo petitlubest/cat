@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width">
-  <title>HeasyQuiz - QUIZ 1!</title>
+  <title>HeasyQuiz - A Strange Tower!</title>
   <link href="https://fonts.googleapis.com/css?family=Spectral+SC" rel="stylesheet">
   <style>
     body {
@@ -31,7 +31,7 @@
       $("div").click(function() {
         $("body").hide();
         var data = JSON.stringify({
-          "key": "lock2",
+          "key": "lock4",
           "value": $("input")[0].value
         });
         var xhr = new XMLHttpRequest();
@@ -40,7 +40,7 @@
           if (this.readyState === 4) {
             var response = JSON.parse(this.responseText);
             if(response.status == "ok") {
-              window.location.href = "2.html";
+              window.location.href = response["meta"]["url"] + ".html";
               $("body").show();
             } else {
               $("input")[0].value = "Sai rồi!";
@@ -57,10 +57,9 @@
   </script>
 </head>
 <body>
-  <br/><br/>Cảm ơn bạn đã tham gia HeasyQuiz!<br/>
-  Sau đây là câu hỏi số 1.<br/>
-  <span style="visibility: hidden;">trotrecon</span><br/>Đây là cái gì?<br/><br/>
-  <input /><br/>
+  <br/><br/>Chào mừng bạn đến câu hỏi số 3. Cái tháp gì đây?<br/><br/>
+  <img width=600 src="hellomirror.png" /><br/><br/>
+  <input /><br/><br/>
   <div>SUBMIT</div>
 </body>
 </html>

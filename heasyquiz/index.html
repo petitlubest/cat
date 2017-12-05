@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width">
-  <title>HeasyQuiz - QUIZ 2!</title>
+  <title>HeasyQuiz - Hello world!</title>
   <link href="https://fonts.googleapis.com/css?family=Spectral+SC" rel="stylesheet">
   <style>
     body {
@@ -31,7 +31,7 @@
       $("div").click(function() {
         $("body").hide();
         var data = JSON.stringify({
-          "key": "lock3",
+          "key": "lock1",
           "value": $("input")[0].value
         });
         var xhr = new XMLHttpRequest();
@@ -40,7 +40,7 @@
           if (this.readyState === 4) {
             var response = JSON.parse(this.responseText);
             if(response.status == "ok") {
-              window.location.href = "3.html";
+              window.location.href = response["meta"]["url"] + ".html";
               $("body").show();
             } else {
               $("input")[0].value = "Sai rồi!";
@@ -57,9 +57,7 @@
   </script>
 </head>
 <body>
-  <br/><br/>Chào mừng bạn đến câu hỏi số 2. Hãy nhìn thật kỹ bức ảnh sau!<br/><br/>
-  <img width=300 src="2.JPG" /><br/><br/>
-  <input /><br/>
+  <br/><br/><input placeholder="input anything" /><br/><br/>
   <div>SUBMIT</div>
 </body>
 </html>

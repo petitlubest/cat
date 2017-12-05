@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width">
-  <title>HeasyQuiz - Hello world!</title>
+  <title>HeasyQuiz - A Pure Text</title>
   <link href="https://fonts.googleapis.com/css?family=Spectral+SC" rel="stylesheet">
   <style>
     body {
@@ -31,7 +31,7 @@
       $("div").click(function() {
         $("body").hide();
         var data = JSON.stringify({
-          "key": "lock1",
+          "key": "lock2",
           "value": $("input")[0].value
         });
         var xhr = new XMLHttpRequest();
@@ -57,7 +57,10 @@
   </script>
 </head>
 <body>
-  <br/><br/><input placeholder="input anything" /><br/>
+  <br/><br/>Cảm ơn bạn đã tham gia HeasyQuiz!<br/>
+  Sau đây là câu hỏi số 1.<br/>
+  <span style="visibility: hidden;">trotrecon</span><br/>Đây là cái gì?<br/><br/>
+  <input /><br/><br/>
   <div>SUBMIT</div>
 </body>
 </html>
