@@ -15,7 +15,7 @@
     }
     
     input {
-      height:30px;
+      height:40px;
       font-size:25pt;
       text-align: center;
       font-family: 'Spectral SC', serif;
@@ -43,7 +43,7 @@
               window.location.href = response["meta"]["url"] + ".html";
               $("body").show();
             } else {
-              $("input")[0].value = "";
+              $("input")[0].value = "Sai rồi!";
               $("body").show();
             }
           }
@@ -57,7 +57,7 @@
   </script>
 </head>
 <body>
-  <br/><br/>Mời bạn nhập lại đáp án câu hỏi số 1 :)<br/><input type="password" placeholder="input anything" /><br/>
+  <br/><br/>Mời bạn nhập lại đáp án câu hỏi số 1 :)<br/><input placeholder="input anything" /><br/>
   <div>SUBMIT</div>
 </body>
 </html>

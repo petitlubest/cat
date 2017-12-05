@@ -15,7 +15,7 @@
     }
     
     input {
-      height:30px;
+      height:40px;
       font-size:25pt;
       text-align: center;
       font-family: 'Spectral SC', serif;
@@ -40,10 +40,10 @@
           if (this.readyState === 4) {
             var response = JSON.parse(this.responseText);
             if(response.status == "ok") {
-              window.location.href = "2.html";
+              window.location.href = "3.html";
               $("body").show();
             } else {
-              $("input")[0].value = "";
+              $("input")[0].value = "Sai rồi!";
               $("body").show();
             }
           }
@@ -57,8 +57,9 @@
   </script>
 </head>
 <body>
-  <br/><br/>Chửa có câu hỏi thứ 2 =))<br/>
-  <input type="password" /><br/>
+  <br/><br/>Chào mừng bạn đến câu hỏi số 2. Hãy nhìn thật kỹ bức ảnh sau!<br/><br/>
+  <img width=300 src="2.JPG" /><br/><br/>
+  <input /><br/>
   <div>SUBMIT</div>
 </body>
 </html>
