@@ -41,7 +41,6 @@
             var response = JSON.parse(this.responseText);
             if(response.status == "ok") {
               window.location.href = response["meta"]["url"] + ".html";
-              $("body").show();
             } else {
               $("input")[0].value = "Sai rồi!";
               $("body").show();
@@ -57,10 +56,15 @@
   </script>
 </head>
 <body>
-  <br/><br/>Bạn đã làm hết các câu hỏi hiện tại :)
-  <!-- <br/><br/>Chào mừng bạn đến câu hỏi số 3. Cái tháp gì đây?<br/><br/>
-  <img width=600 src="hellomirror.png" /><br/><br/>
+  <br/><br/>Chào mừng bạn đến câu hỏi số 4.<br/>
+  Bạn có biết về QR code?<br/>
+  <strong>Tôi có một câu hỏi!</strong><br/><br />
+  <img width=100 src="akeyboardbreaker_i.jpg" />
+  <img width=100 src="akeyboardbreaker_have.jpg" />
+  <img width=100 src="akeyboardbreaker_!.jpg" />
+  <img width=100 src="akeyboardbreaker_question.jpg" />
+  <img width=100 src="akeyboardbreaker_have.jpg" /><br /><br />
   <input /><br/><br/>
-  <div>SUBMIT</div> -->
+  <div>SUBMIT</div>
 </body>
 </html>

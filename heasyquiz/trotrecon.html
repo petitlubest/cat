@@ -41,7 +41,6 @@
             var response = JSON.parse(this.responseText);
             if(response.status == "ok") {
               window.location.href = response["meta"]["url"] + ".html";
-              $("body").show();
             } else {
               $("input")[0].value = "Sai rồi!";
               $("body").show();
