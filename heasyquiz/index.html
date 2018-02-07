@@ -41,23 +41,47 @@
           "value": $("input")[0].value,
           "ip_info": ip_info
         });
-        var xhr = new XMLHttpRequest();
-        xhr.withCredentials = true;
-        xhr.addEventListener("readystatechange", function () {
-          if (this.readyState === 4) {
-            var response = JSON.parse(this.responseText);
-            if(response.status == "ok") {
-              window.location.href = response["meta"]["url"] + ".html";
-            } else {
-              $("input")[0].value = "Sai rồi!";
-              $("body").show();
-            }
+        
+        var settings = {
+          "async": true,
+          "crossDomain": true,
+          "url": "http://games.heasygame.com/passwords/check",
+          "method": "POST",
+          "headers": {
+            "Content-Type": "application/json",
+            "Cache-Control": "no-cache"
+          },
+          "processData": false,
+          "data": data
+        }
+
+        $.ajax(settings).done(function (response) {
+          var response = JSON.parse(response);
+          if(response.status == "ok") {
+            window.location.href = response["meta"]["url"] + ".html";
+          } else {
+            $("input")[0].value = "Sai rồi!";
+            $("body").show();
           }
         });
-        xhr.open("POST", "http://games.heasygame.com/passwords/check");
-        xhr.setRequestHeader("content-type", "application/json");
-        xhr.setRequestHeader("cache-control", "no-cache");
-        xhr.send(data);
+
+        // var xhr = new XMLHttpRequest();
+        // xhr.withCredentials = true;
+        // xhr.addEventListener("readystatechange", function () {
+        //   if (this.readyState === 4) {
+        //     var response = JSON.parse(this.responseText);
+        //     if(response.status == "ok") {
+        //       window.location.href = response["meta"]["url"] + ".html";
+        //     } else {
+        //       $("input")[0].value = "Sai rồi!";
+        //       $("body").show();
+        //     }
+        //   }
+        // });
+        // xhr.open("POST", "http://games.heasygame.com/passwords/check");
+        // xhr.setRequestHeader("content-type", "application/json");
+        // xhr.setRequestHeader("cache-control", "no-cache");
+        // xhr.send(data);
       });
     });
   </script>
