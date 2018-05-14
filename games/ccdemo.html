@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>CCDEMO</title>
+  <script src="https://code.jquery.com/jquery-2.2.1.min.js"></script>
+  <script src="createjs.min.js"></script>
+  <script>
+    function random_interger(min, range) {
+      return Math.random() * range + min;
+    }
+    var game_data = {
+      init_blood: [random_interger(50, 50), random_interger(50, 50), random_interger(50, 50), random_interger(50, 50), random_interger(50, 50), random_interger(50, 50)],
+      damage: [random_interger(10, 10), random_interger(10, 10), random_interger(10, 10), random_interger(10, 10), random_interger(10, 10), random_interger(10, 10), random_interger(10, 10), random_interger(10, 10)]
+    }
+    var stage, characters = [], dead_characters = [], blood_text = [];
+    var C_HEIGHT=720, C_WIDTH=1280;
+    var states = ["1go", "1fight", "1back", "2go", "2fight", "2back", "3go", "3fight", "3back", "end"];
+    var current_state = 0;
+    $(function(){
+      init();
+    });
+
+    function init() {
+      stage = new createjs.Stage("gameCanvas");
+
+      character_sheet = new createjs.SpriteSheet({
+      "images": ["sprites/Idle (1).png", "sprites/Idle (2).png", "sprites/Idle (3).png", "sprites/Idle (4).png", "sprites/Idle (5).png", "sprites/Idle (6).png", "sprites/Idle (7).png", "sprites/Idle (8).png", "sprites/Idle (9).png", "sprites/Idle (10).png", "sprites/Run (1).png", "sprites/Run (2).png", "sprites/Run (3).png", "sprites/Run (4).png", "sprites/Run (5).png", "sprites/Run (6).png", "sprites/Run (7).png", "sprites/Run (8).png", "sprites/Run (9).png", "sprites/Run (10).png", "sprites/Attack (1).png", "sprites/Attack (2).png", "sprites/Attack (3).png", "sprites/Attack (4).png", "sprites/Attack (5).png", "sprites/Attack (6).png", "sprites/Attack (7).png", "sprites/Attack (8).png", "sprites/Attack (9).png", "sprites/Attack (10).png", "sprites/Idle (1).png", "sprites/Idle (1).png"],
+      "frames": {height: 707, width: 587, count: 32},
+      "animations": { idle: [0, 9], run: [10, 19], attack: [20, 29, "attacked_wait"], attacked_wait: [30]}
+      });
+
+      dead_sheet = new createjs.SpriteSheet({
+      "images": ["sprites/Dead (1).png", "sprites/Dead (2).png", "sprites/Dead (3).png", "sprites/Dead (4).png", "sprites/Dead (5).png", "sprites/Dead (6).png", "sprites/Dead (7).png", "sprites/Dead (8).png", "sprites/Dead (9).png", "sprites/Dead (10).png", "sprites/Dead (10).png"],
+      "frames": {height: 751, width: 944, count: 11},
+      "animations": { dead: [0, 9, "done"], done: [10]}
+      });
+
+      for (var i=0; i<=5; i++) {
+        characters[i] = new createjs.Sprite(character_sheet);
+        characters[i].framerate = 25;
+        characters[i].gotoAndPlay("idle");
+        characters[i].blood = game_data["init_blood"][i];
+        characters[i].damage = game_data["damage"][i];
+        blood_text[i]= new createjs.Text(Math.round(characters[i].blood), "30px Menlo", "#e74c3c");
+        stage.addChild(characters[i]);
+        stage.addChild(blood_text[i]);
+        switch(i) {
+          case 0:
+            characters[i].scaleX = 0.3;
+            characters[i].scaleY = 0.3;
+            characters[i].x = 0;
+            characters[i].y = C_HEIGHT - 200;
+            break;
+          case 1:
+            characters[i].scaleX = 0.25;
+            characters[i].scaleY = 0.25;
+            characters[i].x = 100;
+            characters[i].y = C_HEIGHT - 400;
+            break;
+          case 2:
+            characters[i].scaleX = 0.2;
+            characters[i].scaleY = 0.2;
+            characters[i].x = 200;
+            characters[i].y = C_HEIGHT - 600;
+            break;
+          case 3:
+            characters[i].scaleX = -0.3;
+            characters[i].scaleY = 0.3;
+            characters[i].x = C_WIDTH;
+            characters[i].y = C_HEIGHT - 200;
+            break;
+          case 4:
+            characters[i].scaleX = -0.25;
+            characters[i].scaleY = 0.25;
+            characters[i].x = C_WIDTH - 100;
+            characters[i].y = C_HEIGHT - 400;
+            break;
+          case 5:
+            characters[i].scaleX = -0.2;
+            characters[i].scaleY = 0.2;
+            characters[i].x = C_WIDTH - 200;
+            characters[i].y = C_HEIGHT - 600;
+            break;
+          default:
+            break;
+        }
+        blood_text[i].x = characters[i].x;
+        blood_text[i].y = characters[i].y - 25;
+      }
+      characters[0].gotoAndPlay("run");
+      characters[3].gotoAndPlay("run");
+      createjs.Ticker.addEventListener("tick", tick);
+    }
+
+    function tick() {
+      switch(states[current_state]) {
+        case "1go":
+          characters[0].x += 10;
+          characters[3].x -= 10;
+          blood_text[0].x += 10;
+          blood_text[3].x -= 10;
+          if (characters[0].x + 150 > characters[3].x - 150) {
+            current_state ++;
+            characters[0].gotoAndStop("idle");
+            characters[3].gotoAndPlay("attacked_wait");
+          }
+          break;
+        case "1fight":
+          if (characters[0].currentFrame == 30) {
+            characters[0].gotoAndPlay("idle");
+            characters[3].gotoAndPlay("attack");
+            blood_text[3].text = Math.round(characters[3].blood);
+            if (characters[3].blood <= 0) {
+              tmp_x = characters[3].x;
+              tmp_y = characters[3].y;
+              stage.removeChild(characters[3]);
+              stage.removeChild(blood_text[3]);
+              dead_characters[3] = new createjs.Sprite(dead_sheet);
+              stage.addChild(dead_characters[3]);
+              dead_characters[3].framerate = 25;
+              dead_characters[3].scaleX = -0.3;
+              dead_characters[3].scaleY = 0.3;
+              dead_characters[3].x = tmp_x + 100;
+              dead_characters[3].y = tmp_y;
+              dead_characters[3].gotoAndPlay("dead");
+              characters[0].scaleX *= -1;
+              characters[0].gotoAndPlay("run");
+              current_state ++;
+            }
+            characters[0].blood -= characters[3].damage;
+          }
+          if (characters[3].currentFrame == 30) {
+            characters[3].gotoAndPlay("idle");
+            characters[0].gotoAndPlay("attack");
+            blood_text[0].text = Math.round(characters[0].blood);
+            if (characters[0].blood <= 0) {
+              tmp_x = characters[0].x;
+              tmp_y = characters[0].y;
+              stage.removeChild(characters[0]);
+              stage.removeChild(blood_text[0]);
+              dead_characters[0] = new createjs.Sprite(dead_sheet);
+              stage.addChild(dead_characters[0]);
+              dead_characters[0].framerate = 25;
+              dead_characters[0].scaleX = 0.3;
+              dead_characters[0].scaleY = 0.3;
+              dead_characters[0].x = tmp_x - 100;
+              dead_characters[0].y = tmp_y;
+              dead_characters[0].gotoAndPlay("dead");
+              characters[3].scaleX *= -1;
+              characters[3].gotoAndPlay("run");
+              current_state ++;
+            }
+            characters[3].blood -= characters[0].damage;
+          }
+          break;
+        case "1back":
+          if (!dead_characters[0]) {
+            characters[0].x -= 10;
+            blood_text[0].x = characters[0].x;
+            if (characters[0].x < 150) {
+              characters[0].x = 0;
+              blood_text[3].x = characters[3].x;
+              characters[0].scaleX *= -1;
+              characters[0].gotoAndPlay("idle");
+              current_state ++;
+              characters[1].gotoAndPlay("run");
+              characters[4].gotoAndPlay("run");
+            }
+          }
+
+          if (!dead_characters[3]) {
+            characters[3].x += 10;
+            blood_text[3].x = characters[3].x;
+            if (characters[3].x > C_WIDTH - 150) {
+              characters[3].x = C_WIDTH;
+              blood_text[3].x = characters[3].x;
+              characters[3].scaleX *= -1;
+              characters[3].gotoAndPlay("idle");
+              current_state ++;
+              characters[1].gotoAndPlay("run");
+              characters[4].gotoAndPlay("run");
+            }
+          }
+
+          break;
+
+
+        case "2go":
+          characters[1].x += 10;
+          characters[4].x -= 10;
+          blood_text[1].x = characters[1].x;
+          blood_text[4].x = characters[4].x;
+          if (characters[1].x + 125 > characters[4].x - 125) {
+            current_state ++;
+            characters[1].gotoAndStop("idle");
+            characters[4].gotoAndPlay("attacked_wait");
+          }
+          break;
+        case "2fight":
+          if (characters[1].currentFrame == 30) {
+            characters[1].gotoAndPlay("idle");
+            characters[4].gotoAndPlay("attack");
+            blood_text[4].text = Math.round(characters[4].blood);
+            if (characters[4].blood <= 0) {
+              tmp_x = characters[4].x;
+              tmp_y = characters[4].y;
+              stage.removeChild(characters[4]);
+              dead_characters[4] = new createjs.Sprite(dead_sheet);
+              stage.addChild(dead_characters[4]);
+              stage.removeChild(blood_text[4]);
+              dead_characters[4].framerate = 25;
+              dead_characters[4].scaleX = -0.25;
+              dead_characters[4].scaleY = 0.25;
+              dead_characters[4].x = tmp_x + 100;
+              dead_characters[4].y = tmp_y;
+              dead_characters[4].gotoAndPlay("dead");
+              characters[1].scaleX *= -1;
+              characters[1].gotoAndPlay("run");
+              current_state ++;
+            }
+            characters[1].blood -= characters[4].damage;
+          }
+          if (characters[4].currentFrame == 30) {
+            characters[4].gotoAndPlay("idle");
+            characters[1].gotoAndPlay("attack");
+            blood_text[1].text = Math.round(characters[1].blood);
+            if (characters[1].blood <= 0) {
+              tmp_x = characters[1].x;
+              tmp_y = characters[1].y;
+              stage.removeChild(characters[1]);
+              stage.removeChild(blood_text[1]);
+              dead_characters[1] = new createjs.Sprite(dead_sheet);
+              stage.addChild(dead_characters[1]);
+              dead_characters[1].framerate = 25;
+              dead_characters[1].scaleX = 0.25;
+              dead_characters[1].scaleY = 0.25;
+              dead_characters[1].x = tmp_x - 100;
+              dead_characters[1].y = tmp_y;
+              dead_characters[1].gotoAndPlay("dead");
+              characters[4].scaleX *= -1;
+              characters[4].gotoAndPlay("run");
+              current_state ++;
+            }
+            characters[4].blood -= characters[1].damage;
+          }
+          break;
+        case "2back":
+          if (!dead_characters[1]) {
+            characters[1].x -= 10;
+            blood_text[1].x = characters[1].x;
+            if (characters[1].x < 250) {
+              characters[1].x = 100;
+              blood_text[1].x = characters[1].x;
+              characters[1].scaleX *= -1;
+              characters[1].gotoAndPlay("idle");
+              current_state ++;
+              characters[2].gotoAndPlay("run");
+              characters[5].gotoAndPlay("run");
+            }
+          }
+
+          if (!dead_characters[4]) {
+            characters[4].x += 10;
+            blood_text[4].x = characters[4].x;
+            if (characters[4].x > C_WIDTH - 250) {
+              characters[4].x = C_WIDTH - 100;
+              blood_text[4].x = characters[4].x;
+              characters[4].scaleX *= -1;
+              characters[4].gotoAndPlay("idle");
+              current_state ++;
+              characters[2].gotoAndPlay("run");
+              characters[5].gotoAndPlay("run");
+            }
+          }
+          break;
+
+
+          case "3go":
+            characters[2].x += 10;
+            characters[5].x -= 10;
+            blood_text[2].x = characters[2].x;
+            blood_text[5].x = characters[5].x;
+            if (characters[2].x + 100 > characters[5].x - 100) {
+              current_state ++;
+              characters[2].gotoAndStop("idle");
+              characters[5].gotoAndPlay("attacked_wait");
+            }
+            break;
+          case "3fight":
+            if (characters[2].currentFrame == 30) {
+              characters[2].gotoAndPlay("idle");
+              characters[5].gotoAndPlay("attack");
+              blood_text[5].text = Math.round(characters[5].blood);
+              if (characters[5].blood <= 0) {
+                tmp_x = characters[5].x;
+                tmp_y = characters[5].y;
+                stage.removeChild(characters[5]);
+                stage.removeChild(blood_text[5]);
+                dead_characters[5] = new createjs.Sprite(dead_sheet);
+                stage.addChild(dead_characters[5]);
+                dead_characters[5].framerate = 25;
+                dead_characters[5].scaleX = -0.2;
+                dead_characters[5].scaleY = 0.2;
+                dead_characters[5].x = tmp_x + 100;
+                dead_characters[5].y = tmp_y;
+                dead_characters[5].gotoAndPlay("dead");
+                characters[2].scaleX *= -1;
+                characters[2].gotoAndPlay("run");
+                current_state ++;
+              }
+              characters[2].blood -= characters[5].damage;
+            }
+            if (characters[5].currentFrame == 30) {
+              characters[5].gotoAndPlay("idle");
+              characters[2].gotoAndPlay("attack");
+              blood_text[2].text = Math.round(characters[2].blood);
+              if (characters[2].blood <= 0) {
+                tmp_x = characters[2].x;
+                tmp_y = characters[2].y;
+                stage.removeChild(characters[2]);
+                stage.removeChild(blood_text[2]);
+                dead_characters[2] = new createjs.Sprite(dead_sheet);
+                stage.addChild(dead_characters[2]);
+                dead_characters[2].framerate = 25;
+                dead_characters[2].scaleX = 0.2;
+                dead_characters[2].scaleY = 0.2;
+                dead_characters[2].x = tmp_x - 100;
+                dead_characters[2].y = tmp_y;
+                dead_characters[2].gotoAndPlay("dead");
+                characters[5].scaleX *= -1;
+                characters[5].gotoAndPlay("run");
+                current_state ++;
+              }
+              characters[5].blood -= characters[2].damage;
+            }
+            break;
+          case "3back":
+            if (!dead_characters[2]) {
+              characters[2].x -= 10;
+              blood_text[2].x = characters[2].x;
+              if (characters[2].x < 350) {
+                characters[2].x = 200;
+                blood_text[2].x = characters[2].x;
+                characters[2].scaleX *= -1;
+                characters[2].gotoAndPlay("idle");
+                current_state ++;
+              }
+            }
+
+            if (!dead_characters[5]) {
+              characters[5].x += 10;
+              blood_text[5].x = characters[5].x;
+              if (characters[5].x > C_WIDTH - 350) {
+                characters[5].x = C_WIDTH - 200;
+                blood_text[5].x = characters[5].x;
+                characters[5].scaleX *= -1;
+                characters[5].gotoAndPlay("idle");
+                current_state ++;
+              }
+            }
+          break;
+
+        default:
+          break;
+      }
+      stage.update();
+    }
+  </script>
+</head>
+
+<body style="background-color: #2c3e50;">
+  <div style="padding:10px;margin:10px;text-align:center;color:white;font-family:Arial;font-size:20px;">
+    <span onClick="window.location.reload()" style="padding:10px;margin:10px;background-color:#209900;cursor:pointer;-webkit-user-select:none;">Replay</span>
+    <br/>
+  </div>
+  <div style="text-align: center;">
+    <canvas style="background-color: #ecf0f1;" id="gameCanvas" width="1280" height="720"></canvas>
+  </div>
+</body>
+</html>
