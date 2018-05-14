@@ -14,7 +14,7 @@
       init_blood: [random_interger(50, 50), random_interger(50, 50), random_interger(50, 50), random_interger(50, 50), random_interger(50, 50), random_interger(50, 50)],
       damage: [random_interger(10, 10), random_interger(10, 10), random_interger(10, 10), random_interger(10, 10), random_interger(10, 10), random_interger(10, 10), random_interger(10, 10), random_interger(10, 10)]
     }
-    var stage, characters = [], dead_characters = [], blood_text = [];
+    var stage, characters = [], dead_characters = [], blood_bar = [];
     var C_HEIGHT=720, C_WIDTH=1280;
     var states = ["1go", "1fight", "1back", "2go", "2fight", "2back", "3go", "3fight", "3back", "end"];
     var current_state = [0, 0, 0];
@@ -47,9 +47,10 @@
         }
         characters[i].blood = game_data["init_blood"][i];
         characters[i].damage = game_data["damage"][i];
-        blood_text[i]= new createjs.Text(Math.round(characters[i].blood), "25px Menlo", "#e74c3c");
+        blood_bar[i]= new createjs.Shape();
+        blood_bar[i].graphics.beginFill("#e74c3c").drawRect(0, 0, 200, 10);
         stage.addChild(characters[i]);
-        stage.addChild(blood_text[i]);
+        stage.addChild(blood_bar[i]);
         switch(i) {
           case 0:
             characters[i].scaleX = 0.3;
@@ -90,8 +91,14 @@
           default:
             break;
         }
-        blood_text[i].x = characters[i].x;
-        blood_text[i].y = characters[i].y - 25;
+        if (i > 2) {
+          blood_bar[i].x = characters[i].x - 100;
+          blood_bar[i].y = characters[i].y - 5;
+        } else {
+          blood_bar[i].y = characters[i].y + 5;
+          blood_bar[i].x = characters[i].x + 25;
+        }
+        blood_bar[i].scaleX = characters[i].blood / 100.0
       }
       createjs.Ticker.addEventListener("tick", tick);
     }
@@ -100,7 +107,7 @@
       switch(current_state[0]) {
         case 0:
           characters[3].x -= 10;
-          blood_text[3].x -= 10;
+          blood_bar[3].x -= 10;
           if (characters[0].x + 150 > characters[3].x - 150) {
             current_state[0] ++;
             characters[0].gotoAndStop("idle");
@@ -111,12 +118,12 @@
           if (characters[0].currentFrame == 30) {
             characters[0].gotoAndPlay("idle");
             characters[3].gotoAndPlay("attack");
-            blood_text[3].text = Math.round(characters[3].blood);
+            blood_bar[3].scaleX = Math.round(characters[3].blood) / 100.0;
             if (characters[3].blood <= 0) {
               tmp_x = characters[3].x;
               tmp_y = characters[3].y;
               stage.removeChild(characters[3]);
-              stage.removeChild(blood_text[3]);
+              stage.removeChild(blood_bar[3]);
               dead_characters[3] = new createjs.Sprite(dead_sheet);
               stage.addChild(dead_characters[3]);
               dead_characters[3].framerate = 25;
@@ -132,12 +139,12 @@
           if (characters[3].currentFrame == 30) {
             characters[3].gotoAndPlay("idle");
             characters[0].gotoAndPlay("attack");
-            blood_text[0].text = Math.round(characters[0].blood);
+            blood_bar[0].scaleX = Math.round(characters[0].blood) / 100.0;
             if (characters[0].blood <= 0) {
               tmp_x = characters[0].x;
               tmp_y = characters[0].y;
               stage.removeChild(characters[0]);
-              stage.removeChild(blood_text[0]);
+              stage.removeChild(blood_bar[0]);
               dead_characters[0] = new createjs.Sprite(dead_sheet);
               stage.addChild(dead_characters[0]);
               dead_characters[0].framerate = 25;
@@ -157,7 +164,7 @@
       switch(current_state[1]) {
         case 0:
           characters[4].x -= 10;
-          blood_text[4].x = characters[4].x;
+          blood_bar[4].x -= 10;
           if (characters[1].x + 125 > characters[4].x - 125) {
             current_state[1] ++;
             characters[1].gotoAndStop("idle");
@@ -168,14 +175,14 @@
           if (characters[1].currentFrame == 30) {
             characters[1].gotoAndPlay("idle");
             characters[4].gotoAndPlay("attack");
-            blood_text[4].text = Math.round(characters[4].blood);
+            blood_bar[4].scaleX = Math.round(characters[4].blood) / 100.0;
             if (characters[4].blood <= 0) {
               tmp_x = characters[4].x;
               tmp_y = characters[4].y;
               stage.removeChild(characters[4]);
               dead_characters[4] = new createjs.Sprite(dead_sheet);
               stage.addChild(dead_characters[4]);
-              stage.removeChild(blood_text[4]);
+              stage.removeChild(blood_bar[4]);
               dead_characters[4].framerate = 25;
               dead_characters[4].scaleX = -0.25;
               dead_characters[4].scaleY = 0.25;
@@ -189,12 +196,12 @@
           if (characters[4].currentFrame == 30) {
             characters[4].gotoAndPlay("idle");
             characters[1].gotoAndPlay("attack");
-            blood_text[1].text = Math.round(characters[1].blood);
+            blood_bar[1].scaleX = Math.round(characters[1].blood) / 100.0;
             if (characters[1].blood <= 0) {
               tmp_x = characters[1].x;
               tmp_y = characters[1].y;
               stage.removeChild(characters[1]);
-              stage.removeChild(blood_text[1]);
+              stage.removeChild(blood_bar[1]);
               dead_characters[1] = new createjs.Sprite(dead_sheet);
               stage.addChild(dead_characters[1]);
               dead_characters[1].framerate = 25;
@@ -214,7 +221,7 @@
       switch(current_state[2]) {
         case 0:
           characters[5].x -= 10;
-          blood_text[5].x = characters[5].x;
+          blood_bar[5].x -= 10;
           if (characters[2].x + 100 > characters[5].x - 100) {
             current_state[2] ++;
             characters[2].gotoAndStop("idle");
@@ -225,12 +232,12 @@
           if (characters[2].currentFrame == 30) {
             characters[2].gotoAndPlay("idle");
             characters[5].gotoAndPlay("attack");
-            blood_text[5].text = Math.round(characters[5].blood);
+            blood_bar[5].scaleX = Math.round(characters[5].blood) / 100.0;
             if (characters[5].blood <= 0) {
               tmp_x = characters[5].x;
               tmp_y = characters[5].y;
               stage.removeChild(characters[5]);
-              stage.removeChild(blood_text[5]);
+              stage.removeChild(blood_bar[5]);
               dead_characters[5] = new createjs.Sprite(dead_sheet);
               stage.addChild(dead_characters[5]);
               dead_characters[5].framerate = 25;
@@ -246,12 +253,12 @@
           if (characters[5].currentFrame == 30) {
             characters[5].gotoAndPlay("idle");
             characters[2].gotoAndPlay("attack");
-            blood_text[2].text = Math.round(characters[2].blood);
+            blood_bar[2].scaleX = Math.round(characters[2].blood) / 100.0;
             if (characters[2].blood <= 0) {
               tmp_x = characters[2].x;
               tmp_y = characters[2].y;
               stage.removeChild(characters[2]);
-              stage.removeChild(blood_text[2]);
+              stage.removeChild(blood_bar[2]);
               dead_characters[2] = new createjs.Sprite(dead_sheet);
               stage.addChild(dead_characters[2]);
               dead_characters[2].framerate = 25;
