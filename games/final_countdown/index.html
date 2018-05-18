@@ -11,6 +11,19 @@
 		html, body { height:100%; background-color: black;}
 		body { margin:0; padding:0; text-align: center; color: white; font-size: 25px;}
 		</style>
+		<script type="text/javascript">
+			function playSound() {
+				var sound = document.getElementById("background_sound");
+				var btn = document.getElementById("sound_btn");
+				if (sound.paused) {
+					sound.play();
+					btn.innerHTML = "〓 BACKGROUND MUSIC";
+				} else {
+					sound.pause();
+					btn.innerHTML = "▶ BACKGROUND MUSIC";
+				}
+			}
+		</script>
 	</head>
 	<body>
 		<div>*** THIS GAME DOES NOT HAVE AUTOSAVE FUNCTION ***</div>
@@ -49,6 +62,7 @@
 				<!--<![endif]-->
 			</object>
 		</div>
+		<button id="sound_btn" onclick="playSound()">▶ BACKGROUND MUSIC</button>
 		<hr>
 		<div>
 			Tôi tỉnh dậy. Đôi mắt dần mở ra. Tôi thấy mình đang nằm trên sàn. Đây là đâu?<br/>
@@ -60,8 +74,8 @@
 			Nhưng... Tôi là ai???<br/><br/>
 		</div>
 		<iframe src="https://www.facebook.com/plugins/share_button.php?href=http%3A%2F%2Fheasygame.com%2Fgames%2Ffinal_countdown%2Findex.html&layout=button_count&size=large&mobile_iframe=false&appId=693633977351679&width=84&height=28" width="84" height="28" style="border:none;overflow:hidden" scrolling="no" frameborder="0" allowTransparency="true" allow="encrypted-media"></iframe>
-		<audio controls loop autoplay style="display: none;">
-			<source src="background_sound.mp3" type="audio/mp3">
+		<audio id="background_sound" controls loop autoplay style="display: none;">
+			<source src="background_sound.mp3" type="audio/mpeg">
 		</audio>
 	</body>
 </html>
