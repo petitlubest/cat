@@ -1,0 +1,72 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+	<head>
+		<title>THE FINAL COUNTDOWN by HEASYGAME</title>
+		<meta name="author" content="heasygame" />
+		<meta property="og:title" content="The Final Countdown - Escape game by Heasygame" />
+		<meta property="og:description" content="The Final Countdown - Escape game by Heasygame" />
+		<meta property="og:image" content="http://heasygame.com/games/final_countdown/final_countdown_og.png" />
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<style type="text/css" media="screen">
+		html, body { height:100%; background-color: black;}
+		body { margin:0; padding:0; text-align: center; color: white; font-size: 25px;}
+		</style>
+		<script type="text/javascript">
+			function playSound() {
+				var sound = document.getElementById("background_sound");
+				var btn = document.getElementById("sound_btn");
+				if (sound.paused) {
+					sound.play();
+					btn.innerHTML = "〓 BACKGROUND MUSIC";
+				} else {
+					sound.pause();
+					btn.innerHTML = "▶ BACKGROUND MUSIC";
+				}
+			}
+		</script>
+	</head>
+	<body>
+		<div>*** THIS GAME DOES NOT HAVE AUTOSAVE FUNCTION ***</div>
+		<div id="flashContent">
+			<object classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000" width="1000" height="500" id="the_final_countdown" align="middle">
+				<param name="movie" value="the_final_countdown.swf" />
+				<param name="quality" value="high" />
+				<param name="bgcolor" value="black" />
+				<param name="play" value="true" />
+				<param name="loop" value="true" />
+				<param name="wmode" value="window" />
+				<param name="scale" value="showall" />
+				<param name="menu" value="true" />
+				<param name="devicefont" value="false" />
+				<param name="salign" value="" />
+				<param name="allowScriptAccess" value="sameDomain" />
+				<!--[if !IE]>-->
+				<object type="application/x-shockwave-flash" data="the_final_countdown.swf" width="1000" height="500">
+					<param name="movie" value="the_final_countdown.swf" />
+					<param name="quality" value="high" />
+					<param name="bgcolor" value="black" />
+					<param name="play" value="true" />
+					<param name="loop" value="true" />
+					<param name="wmode" value="window" />
+					<param name="scale" value="showall" />
+					<param name="menu" value="true" />
+					<param name="devicefont" value="false" />
+					<param name="salign" value="" />
+					<param name="allowScriptAccess" value="sameDomain" />
+				<!--<![endif]-->
+					<a href="http://www.adobe.com/go/getflash">
+						<img src="http://www.adobe.com/images/shared/download_buttons/get_flash_player.gif" alt="Get Adobe Flash player" />
+					</a>
+				<!--[if !IE]>-->
+				</object>
+				<!--<![endif]-->
+			</object>
+		</div>
+		<button id="sound_btn" onclick="playSound()">▶ BACKGROUND MUSIC</button>
+		<hr>
+		<iframe src="https://www.facebook.com/plugins/share_button.php?href=http%3A%2F%2Fheasygame.com%2Fgames%2Ffinal_countdown%2Findex.html&layout=button_count&size=large&mobile_iframe=false&appId=693633977351679&width=84&height=28" width="84" height="28" style="border:none;overflow:hidden" scrolling="no" frameborder="0" allowTransparency="true" allow="encrypted-media"></iframe>
+		<audio id="background_sound" controls loop autoplay style="display: none;">
+			<source src="background_sound.mp3" type="audio/mpeg">
+		</audio>
+	</body>
+</html>
