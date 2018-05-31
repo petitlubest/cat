@@ -117,9 +117,9 @@
       crystal_hp_text[1]= new createjs.Text(game_data["crystal_hp"][1], "100px Menlo", "#27ae60");
 
       crystal_hp_text[0].x = 100;
-      crystal_hp_text[0].y = 300;
+      crystal_hp_text[0].y = 100;
       crystal_hp_text[1].x = 1000;
-      crystal_hp_text[1].y = 300;
+      crystal_hp_text[1].y = 100;
 
       stage.addChild(crystal_hp_text[0]);
       stage.addChild(crystal_hp_text[1]);
@@ -139,13 +139,13 @@
         characters[i].def = game_data["def"][i];
         characters[i].cmd = game_data["cmd"][i];
         if (i <= 2) {
-          info_text[i]= new createjs.Text("HP " + characters[i].hp + "\nATK " + characters[i].atk + "\nDEF " + characters[i].def + "\nCMD " + characters[i].cmd + "\nC_ATK " + characters[i].c_atk, "20px Menlo", i <= 2 ? "#e74c3c" : "#27ae60");
+          info_text[i]= new createjs.Text("HP " + characters[i].hp + "\nATK " + characters[i].atk + "\nDEF " + characters[i].def + "\nCMD " + characters[i].cmd + "\nC_ATK " + characters[i].c_atk, "15px Menlo", i <= 2 ? "#e74c3c" : "#27ae60");
           info_text[i].textAlign = "right";
         } else {
-          info_text[i]= new createjs.Text(characters[i].hp + " HP\n" + characters[i].atk + " ATK\n" + characters[i].def + " DEF\n" + characters[i].cmd + " CMD\n" + characters[i].c_atk + " C_ATK", "20px Menlo", i <= 2 ? "#e74c3c" : "#27ae60");
+          info_text[i]= new createjs.Text(characters[i].hp + " HP\n" + characters[i].atk + " ATK\n" + characters[i].def + " DEF\n" + characters[i].cmd + " CMD\n" + characters[i].c_atk + " C_ATK", "15px Menlo", i <= 2 ? "#e74c3c" : "#27ae60");
           info_text[i].textAlign = "left";
         }
-        info_text[i].lineHeight = 25;
+        info_text[i].lineHeight = 15;
         document.getElementById("character_hp_" + i).value = characters[i].hp;
         document.getElementById("character_atk_" + i).value = characters[i].atk;
         document.getElementById("character_c_atk_" + i).value = characters[i].c_atk;
@@ -155,39 +155,39 @@
         stage.addChild(info_text[i]);
         switch(i) {
           case 0:
-            characters[i].scaleX = 0.3;
-            characters[i].scaleY = 0.3;
-            characters[i].x = C_WIDTH / 2 - 150;
-            characters[i].y = C_HEIGHT - 200;
+            characters[i].scaleX = 0.15;
+            characters[i].scaleY = 0.15;
+            characters[i].x = C_WIDTH / 2 - 75;
+            characters[i].y = C_HEIGHT - 500;
             break;
           case 1:
-            characters[i].scaleX = 0.3;
-            characters[i].scaleY = 0.3;
-            characters[i].x = C_WIDTH / 2 - 150;
-            characters[i].y = C_HEIGHT - 450;
+            characters[i].scaleX = 0.15;
+            characters[i].scaleY = 0.15;
+            characters[i].x = C_WIDTH / 2 - 75;
+            characters[i].y = C_HEIGHT - 600;
             break;
           case 2:
-            characters[i].scaleX = 0.3;
-            characters[i].scaleY = 0.3;
-            characters[i].x = C_WIDTH / 2 - 150;
+            characters[i].scaleX = 0.15;
+            characters[i].scaleY = 0.15;
+            characters[i].x = C_WIDTH / 2 - 75;
             characters[i].y = C_HEIGHT - 700;
             break;
           case 3:
-            characters[i].scaleX = -0.3;
-            characters[i].scaleY = 0.3;
-            characters[i].x = C_WIDTH / 2 + 150;
-            characters[i].y = C_HEIGHT - 200;
+            characters[i].scaleX = -0.15;
+            characters[i].scaleY = 0.15;
+            characters[i].x = C_WIDTH / 2 + 75;
+            characters[i].y = C_HEIGHT - 500;
             break;
           case 4:
-            characters[i].scaleX = -0.3;
-            characters[i].scaleY = 0.3;
-            characters[i].x = C_WIDTH / 2 + 150;
-            characters[i].y = C_HEIGHT - 450;
+            characters[i].scaleX = -0.15;
+            characters[i].scaleY = 0.15;
+            characters[i].x = C_WIDTH / 2 + 75;
+            characters[i].y = C_HEIGHT - 600;
             break;
           case 5:
-            characters[i].scaleX = -0.3;
-            characters[i].scaleY = 0.3;
-            characters[i].x = C_WIDTH / 2 + 150;
+            characters[i].scaleX = -0.15;
+            characters[i].scaleY = 0.15;
+            characters[i].x = C_WIDTH / 2 + 75;
             characters[i].y = C_HEIGHT - 700;
             break;
           default:
@@ -195,10 +195,10 @@
         }
         if (i <= 2) {
           info_text[i].x = characters[i].x;
-          info_text[i].y = characters[i].y + 50;  
+          info_text[i].y = characters[i].y + 20;  
         } else {
           info_text[i].x = characters[i].x;
-          info_text[i].y = characters[i].y + 50;
+          info_text[i].y = characters[i].y + 20;
         }
         
       }
@@ -442,8 +442,8 @@
       dead_characters[i] = new createjs.Sprite(dead_sheet);
       stage.addChild(dead_characters[i]);
       dead_characters[i].framerate = 25;
-      dead_characters[i].scaleX = 0.3 * (i <= 2 ? 1 : -1);
-      dead_characters[i].scaleY = 0.3;
+      dead_characters[i].scaleX = 0.15 * (i <= 2 ? 1 : -1);
+      dead_characters[i].scaleY = 0.15;
       dead_characters[i].x = tmp_x - 100 * (i <= 2 ? 1 : -1);
       dead_characters[i].y = tmp_y;
       dead_characters[i].gotoAndPlay("dead");
@@ -675,7 +675,7 @@
     <div style="clear:both;text-align:center;"></div>
   </div>
   <div style="text-align: center;">
-    <canvas id="gameCanvas" width="1280" height="720"></canvas>
+    <canvas id="gameCanvas" width="1280" height="400"></canvas>
   </div>
 </body>
 </html>
