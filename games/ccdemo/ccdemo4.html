@@ -124,6 +124,11 @@
       stage.addChild(crystal_hp_text[0]);
       stage.addChild(crystal_hp_text[1]);
 
+      document.getElementById("crystal_hp_l").value = game_data["crystal_hp"][0];
+      document.getElementById("crystal_hp_r").value = game_data["crystal_hp"][1];
+      document.getElementById("atk_raise_input").value = game_data["atk_raise"];
+      document.getElementById("def_raise_input").value = game_data["def_raise"];
+
       for (var i=0; i<=5; i++) {
         characters[i] = new createjs.Sprite(character_sheet);
         characters[i].framerate = 25;
@@ -227,6 +232,8 @@
           info_text[i].text = characters[i].hp + " HP\n" + characters[i].atk + " ATK\n" + characters[i].def + " DEF\n" + characters[i].cmd + " CMD\n" + characters[i].c_atk + " C_ATK";
         }
       }
+      crystal_hp_text[0].text = game_data["crystal_hp"][0];
+      crystal_hp_text[1].text = game_data["crystal_hp"][1];
       stage.update();
       
       if (pending) {
@@ -568,6 +575,9 @@
         characters[i].def = parseInt(document.getElementById("character_def_" + i).value);
         characters[i].cmd = document.getElementById("character_cmd_" + i).value;
       }
+      game_data["atk_raise"] = document.getElementById("atk_raise_input").value;
+      game_data["def_raise"] = document.getElementById("def_raise_input").value;
+      game_data["crystal_hp"] = [document.getElementById("crystal_hp_l").value, document.getElementById("crystal_hp_r").value];
     }
 
     function play_turn() {
@@ -599,6 +609,7 @@
   <div id="options">
     <div class="team-wrapper">
       <span>JAPAN</span><br/>
+      <span class="role">CRYSTAL HP</span><input class="info-input" id="crystal_hp_l"></input><br/>
       <span>HP</span><input class="info-input" id="character_hp_2"></input>
       <span>ATK</span><input class="info-input" id="character_atk_2"></input>
       <span>C_ATK</span><input class="info-input" id="character_c_atk_2"></input>
@@ -620,6 +631,7 @@
     </div>
     <div class="team-wrapper right-team">
       <span>VIETNAM</span><br/>
+      <span class="role">CRYSTAL HP</span><input class="info-input" id="crystal_hp_r"></input><br/>
       <span class="role">LEADER</span>
       <span>HP</span><input class="info-input" id="character_hp_5"></input>
       <span>ATK</span><input class="info-input" id="character_atk_5"></input>
@@ -640,6 +652,9 @@
       <span>CMD</span><input class="info-input" id="character_cmd_3"></input>
     </div>
     <div style="clear:both;text-align:center;"></div>
+      <hr>
+      <span>TIMES OF ATK RAISE ON ULTIMATE</span><input class="info-input" id="atk_raise_input"></input>
+      <span>TIMES OF DEF RAISE ON DEFENSE</span><input class="info-input" id="def_raise_input"></input>
   </div>
   <div class="lane-info-wrapper">
     <div id="lane-info-title" class="lane-info">NEXT TURN: PREPARING</div>
