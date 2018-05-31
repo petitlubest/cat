@@ -315,10 +315,10 @@
           var turn = current_state - 5;
           execute_fight(characters[1], characters[4], characters[1].cmd[turn-1], characters[4].cmd[turn-1]);
           if (characters[1].hp <= 0) {
-            set_dead(4);
+            set_dead(1);
           }
           if (characters[4].hp <= 0) {
-            set_dead(1);
+            set_dead(4);
           }
           if (dead_characters[1] && dead_characters[4]) {
             current_state = 11;
