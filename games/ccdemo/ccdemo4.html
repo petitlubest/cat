@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>CCDEMO</title>
+  <style type="text/css">
+    body {
+      background-color: #2c3e50;
+    }
+
+    .actions {
+      padding: 5px;
+      margin: 5px;
+      text-align: center;
+      color: white;
+      font-family: Menlo;
+      font-size: 15px;
+    }
+
+    .toggle-btn {
+      padding: 5px;
+      margin: 5px;
+      background-color: #209900;
+      cursor: pointer;
+      -webkit-user-select: none;
+    }
+
+    #options, .lane-info-wrapper {
+      background-color: #ecf0f1;
+      width: 1260px;
+      margin: 10px auto;
+      padding: 10px;
+    }
+
+    .lane-info {
+      text-align: center;
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    .lane-l-info, .lane-r-info {
+      font-weight: bold;
+    }
+
+    .lane-l-info {
+      padding-right: 25px;
+    }
+
+    .lane-r-info {
+      padding-left: 25px;
+    }
+
+    #gameCanvas {
+      background-color: #ecf0f1;
+    }
+
+    .team-wrapper {
+      width: 50%;
+      float: left;
+    }
+
+    .right-team {
+      text-align: right;
+    }
+
+    .role {
+      font-weight: bold;
+      width: 200px;
+    }
+
+    .info-input {
+      width: 60px;
+    }
+  </style>
+  <script src="https://code.jquery.com/jquery-2.2.1.min.js"></script>
+  <script src="../createjs.min.js"></script>
+  <script>
+    function random_interger(min, range) {
+      return Math.round(Math.random() * range + min);
+    }
+    var game_data = {
+      init_hp: [random_interger(50, 10), random_interger(50, 10), random_interger(50, 10), random_interger(50, 10), random_interger(50, 10), random_interger(50, 10)],
+      atk: [random_interger(20, 5), random_interger(20, 5), random_interger(20, 5), random_interger(20, 5), random_interger(20, 5), random_interger(20, 5), random_interger(20, 5), random_interger(20, 5)],
+      c_atk: [random_interger(20, 5), random_interger(20, 5), random_interger(20, 5), random_interger(20, 5), random_interger(20, 5), random_interger(20, 5), random_interger(20, 5), random_interger(20, 5)],
+      def: [random_interger(20, 5), random_interger(20, 5), random_interger(20, 5), random_interger(20, 5), random_interger(20, 5), random_interger(20, 5), random_interger(20, 5), random_interger(20, 5)],
+      cmd: ["ADCU".split('').sort(function(){return 0.5-Math.random()}).join(''),"ADCU".split('').sort(function(){return 0.5-Math.random()}).join(''),"ADCU".split('').sort(function(){return 0.5-Math.random()}).join(''),"ADCU".split('').sort(function(){return 0.5-Math.random()}).join(''),"ADCU".split('').sort(function(){return 0.5-Math.random()}).join(''),"ADCU".split('').sort(function(){return 0.5-Math.random()}).join('')],
+      crystal_hp: [random_interger(50, 50), random_interger(50, 50)],
+      def_raise: 2,
+      atk_raise: 2
+    }
+    var stage, characters = [], dead_characters = [], info_text = [], crystal_hp_text = [];
+    var C_HEIGHT=720, C_WIDTH=1280;
+    var states = ["pending","11","12","13","14","1c","21","22","23","24","2c","31","32","33","34","3c","end"];
+    var pending = true;
+    var current_state = 0;
+    $(function(){
+      init();
+    });
+
+    function init() {
+      stage = new createjs.Stage("gameCanvas");
+
+      character_sheet = new createjs.SpriteSheet({
+      "images": ["sprites/Idle (1).png", "sprites/Idle (2).png", "sprites/Idle (3).png", "sprites/Idle (4).png", "sprites/Idle (5).png", "sprites/Idle (6).png", "sprites/Idle (7).png", "sprites/Idle (8).png", "sprites/Idle (9).png", "sprites/Idle (10).png", "sprites/Run (1).png", "sprites/Run (2).png", "sprites/Run (3).png", "sprites/Run (4).png", "sprites/Run (5).png", "sprites/Run (6).png", "sprites/Run (7).png", "sprites/Run (8).png", "sprites/Run (9).png", "sprites/Run (10).png", "sprites/Attack (1).png", "sprites/Attack (2).png", "sprites/Attack (3).png", "sprites/Attack (4).png", "sprites/Attack (5).png", "sprites/Attack (6).png", "sprites/Attack (7).png", "sprites/Attack (8).png", "sprites/Attack (9).png", "sprites/Attack (10).png", "sprites/Idle (1).png", "sprites/Idle (1).png"],
+      "frames": {height: 707, width: 587, count: 32},
+      "animations": { idle: [0, 9], run: [10, 19], attack: [20, 29, "attacked_wait"], attacked_wait: [30]}
+      });
+
+      dead_sheet = new createjs.SpriteSheet({
+      "images": ["sprites/Dead (1).png", "sprites/Dead (2).png", "sprites/Dead (3).png", "sprites/Dead (4).png", "sprites/Dead (5).png", "sprites/Dead (6).png", "sprites/Dead (7).png", "sprites/Dead (8).png", "sprites/Dead (9).png", "sprites/Dead (10).png", "sprites/Dead (10).png"],
+      "frames": {height: 751, width: 944, count: 11},
+      "animations": { dead: [0, 9, "done"], done: [10]}
+      });
+
+      crystal_hp_text[0]= new createjs.Text(game_data["crystal_hp"][0], "100px Menlo", "#e74c3c");
+      crystal_hp_text[1]= new createjs.Text(game_data["crystal_hp"][1], "100px Menlo", "#27ae60");
+
+      crystal_hp_text[0].x = 100;
+      crystal_hp_text[0].y = 300;
+      crystal_hp_text[1].x = 1000;
+      crystal_hp_text[1].y = 300;
+
+      stage.addChild(crystal_hp_text[0]);
+      stage.addChild(crystal_hp_text[1]);
+
+      for (var i=0; i<=5; i++) {
+        characters[i] = new createjs.Sprite(character_sheet);
+        characters[i].framerate = 25;
+        characters[i].gotoAndPlay("idle");
+        characters[i].hp = game_data["init_hp"][i];
+        characters[i].atk = game_data["atk"][i];
+        characters[i].c_atk = game_data["c_atk"][i];
+        characters[i].def = game_data["def"][i];
+        characters[i].cmd = game_data["cmd"][i];
+        if (i <= 2) {
+          info_text[i]= new createjs.Text("HP " + characters[i].hp + "\nATK " + characters[i].atk + "\nDEF " + characters[i].def + "\nCMD " + characters[i].cmd + "\nC_ATK " + characters[i].c_atk, "20px Menlo", i <= 2 ? "#e74c3c" : "#27ae60");
+          info_text[i].textAlign = "right";
+        } else {
+          info_text[i]= new createjs.Text(characters[i].hp + " HP\n" + characters[i].atk + " ATK\n" + characters[i].def + " DEF\n" + characters[i].cmd + " CMD\n" + characters[i].c_atk + " C_ATK", "20px Menlo", i <= 2 ? "#e74c3c" : "#27ae60");
+          info_text[i].textAlign = "left";
+        }
+        info_text[i].lineHeight = 25;
+        document.getElementById("character_hp_" + i).value = characters[i].hp;
+        document.getElementById("character_atk_" + i).value = characters[i].atk;
+        document.getElementById("character_c_atk_" + i).value = characters[i].c_atk;
+        document.getElementById("character_def_" + i).value = characters[i].def;
+        document.getElementById("character_cmd_" + i).value = characters[i].cmd;
+        stage.addChild(characters[i]);
+        stage.addChild(info_text[i]);
+        switch(i) {
+          case 0:
+            characters[i].scaleX = 0.3;
+            characters[i].scaleY = 0.3;
+            characters[i].x = C_WIDTH / 2 - 150;
+            characters[i].y = C_HEIGHT - 200;
+            break;
+          case 1:
+            characters[i].scaleX = 0.3;
+            characters[i].scaleY = 0.3;
+            characters[i].x = C_WIDTH / 2 - 150;
+            characters[i].y = C_HEIGHT - 450;
+            break;
+          case 2:
+            characters[i].scaleX = 0.3;
+            characters[i].scaleY = 0.3;
+            characters[i].x = C_WIDTH / 2 - 150;
+            characters[i].y = C_HEIGHT - 700;
+            break;
+          case 3:
+            characters[i].scaleX = -0.3;
+            characters[i].scaleY = 0.3;
+            characters[i].x = C_WIDTH / 2 + 150;
+            characters[i].y = C_HEIGHT - 200;
+            break;
+          case 4:
+            characters[i].scaleX = -0.3;
+            characters[i].scaleY = 0.3;
+            characters[i].x = C_WIDTH / 2 + 150;
+            characters[i].y = C_HEIGHT - 450;
+            break;
+          case 5:
+            characters[i].scaleX = -0.3;
+            characters[i].scaleY = 0.3;
+            characters[i].x = C_WIDTH / 2 + 150;
+            characters[i].y = C_HEIGHT - 700;
+            break;
+          default:
+            break;
+        }
+        if (i <= 2) {
+          info_text[i].x = characters[i].x;
+          info_text[i].y = characters[i].y + 50;  
+        } else {
+          info_text[i].x = characters[i].x;
+          info_text[i].y = characters[i].y + 50;
+        }
+        
+      }
+      createjs.Ticker.addEventListener("tick", tick);
+    }
+
+    function get_info_array(i, turn) {
+      var command = characters[i].cmd[turn-1];
+      switch(command) {
+        case "A":
+          command = "Attack";
+          break;
+        case "D":
+          command = "Defense";
+          break;
+        case "C":
+          command = "Counter";
+          break;
+        case "U":
+          command = "Ultimate";
+          break;
+      }
+      return [characters[i].hp, characters[i].atk, characters[i].def, command, characters[i].c_atk];
+    }
+
+    function tick() {
+      for (var i=0; i<=5; i++) {
+        if (i <= 2) {
+          info_text[i].text = "HP " + characters[i].hp + "\nATK " + characters[i].atk + "\nDEF " + characters[i].def + "\nCMD " + characters[i].cmd + "\nC_ATK " + characters[i].c_atk;
+        } else {
+          info_text[i].text = characters[i].hp + " HP\n" + characters[i].atk + " ATK\n" + characters[i].def + " DEF\n" + characters[i].cmd + " CMD\n" + characters[i].c_atk + " C_ATK";
+        }
+      }
+      stage.update();
+      
+      if (pending) {
+        return;
+      }
+
+      switch(states[current_state]) {
+        case "pending":
+          set_lane_info("current_state:" + current_state + " | NEXT: LANE 1 - TURN 1", get_info_array(2, 1), get_info_array(5, 1));
+          current_state ++;
+          document.getElementById("options").style.display = "none";
+          pending = true;
+          break;
+        case "11":
+        case "12":
+        case "13":
+        case "14":
+          var turn = current_state;
+          execute_fight(characters[2], characters[5], characters[2].cmd[turn-1], characters[5].cmd[turn-1]);
+          if (characters[2].hp <= 0) {
+            set_dead(2);
+          }
+          if (characters[5].hp <= 0) {
+            set_dead(5);
+          }
+          if (dead_characters[2] && dead_characters[5]) {
+            current_state = 6;
+            set_lane_info("current_state:" + current_state + " | NEXT: LANE 2 - TURN 1", get_info_array(1, 1), get_info_array(4, 1));
+            pending = true;
+            break;
+          }
+          if (dead_characters[2] || dead_characters[5]) {
+            current_state = 5;
+            set_lane_info("current_state:" + current_state + " | NEXT: LANE 1 - CRYSTAL ATTACK", ["x","x","x","x","x"], ["x","x","x","x","x"]);
+            document.getElementById("l-c_atk").innerHTML = "C_ATK " + characters[2].c_atk;
+            document.getElementById("r-c_atk").innerHTML = characters[5].c_atk + " C_ATK";
+            pending = true;
+            break;
+          }
+          if (turn == 4) {
+            if (characters[2].hp == characters[5].hp) {
+              current_state = 6;
+              set_lane_info("current_state:" + current_state + " | NEXT: LANE 2 - TURN 1", get_info_array(1, 1), get_info_array(4, 1));
+              pending = true;
+              break;
+            }
+
+            if (characters[2].hp < characters[5].hp) {
+              set_dead(2);
+            } else {
+              set_dead(5);
+            }
+            set_lane_info("current_state:" + current_state + " | NEXT: LANE 1 - CRYSTAL ATTACK", ["x","x","x","x","x"], ["x","x","x","x","x"]);
+          } else {
+            set_lane_info("current_state:" + current_state + " | NEXT: LANE 1 - TURN " + (turn + 1), get_info_array(2, turn + 1), get_info_array(5, turn + 1));
+          }
+          document.getElementById("l-c_atk").innerHTML = "C_ATK " + characters[2].c_atk;
+          document.getElementById("r-c_atk").innerHTML = characters[5].c_atk + " C_ATK";
+          current_state ++;
+          pending = true;
+          break;
+        case "1c":
+          if (dead_characters[2]) {
+            characters[5].gotoAndPlay("attack");
+            crystal_hp_text[0].text = parseInt(crystal_hp_text[0].text) - characters[5].c_atk;
+          } else {
+            characters[2].gotoAndPlay("attack");
+            crystal_hp_text[1].text = parseInt(crystal_hp_text[1].text) - characters[2].c_atk;
+          }
+          set_lane_info("current_state:" + current_state + " | NEXT: LANE 2 - TURN 1", get_info_array(1, 1), get_info_array(4, 1));
+          current_state ++;
+          pending = true;
+          break;
+
+        case "21":
+        case "22":
+        case "23":
+        case "24":
+          var turn = current_state - 5;
+          execute_fight(characters[1], characters[4], characters[1].cmd[turn-1], characters[4].cmd[turn-1]);
+          if (characters[1].hp <= 0) {
+            set_dead(4);
+          }
+          if (characters[4].hp <= 0) {
+            set_dead(1);
+          }
+          if (dead_characters[1] && dead_characters[4]) {
+            current_state = 11;
+            set_lane_info("current_state:" + current_state + " | NEXT: LANE 3 - TURN 1", get_info_array(0, 1), get_info_array(3, 1));
+            pending = true;
+            break;
+          }
+          if (dead_characters[1] || dead_characters[4]) {
+            current_state = 10;
+            set_lane_info("current_state:" + current_state + " | NEXT: LANE 2 - CRYSTAL ATTACK", ["x","x","x","x","x"], ["x","x","x","x","x"]);
+            document.getElementById("l-c_atk").innerHTML = "C_ATK " + characters[1].c_atk;
+            document.getElementById("r-c_atk").innerHTML = characters[4].c_atk + " C_ATK";
+            pending = true;
+            break;
+          }
+          if (turn == 4) {
+            if (characters[1].hp == characters[4].hp) {
+              current_state = 11;
+              set_lane_info("current_state:" + current_state + " | NEXT: LANE 3 - TURN 1", get_info_array(0, 1), get_info_array(3, 1));
+              pending = true;
+              break;
+            }
+
+            if (characters[1].hp < characters[4].hp) {
+              set_dead(1);
+            } else {
+              set_dead(4);
+            }
+            set_lane_info("current_state:" + current_state + " | NEXT: LANE 2 - CRYSTAL ATTACK", ["x","x","x","x","x"], ["x","x","x","x","x"]);
+          } else {
+            set_lane_info("current_state:" + current_state + " | NEXT: LANE 2 - TURN " + (turn + 1), get_info_array(1, turn + 1), get_info_array(4, turn + 1));
+          }
+          document.getElementById("l-c_atk").innerHTML = "C_ATK " + characters[1].c_atk;
+          document.getElementById("r-c_atk").innerHTML = characters[4].c_atk + " C_ATK";
+          current_state ++;
+          pending = true;
+          break;
+        case "2c":
+          if (dead_characters[1]) {
+            characters[4].gotoAndPlay("attack");
+            crystal_hp_text[0].text = parseInt(crystal_hp_text[0].text) - characters[4].c_atk;
+          } else {
+            characters[1].gotoAndPlay("attack");
+            crystal_hp_text[1].text = parseInt(crystal_hp_text[1].text) - characters[1].c_atk;
+          }
+          set_lane_info("current_state:" + current_state + " | NEXT: LANE 3 - TURN 1", get_info_array(1, 1), get_info_array(4, 1));
+          current_state ++;
+          pending = true;
+          break;
+
+        case "31":
+        case "32":
+        case "33":
+        case "34":
+          var turn = current_state - 10;
+          execute_fight(characters[0], characters[3], characters[0].cmd[turn-1], characters[3].cmd[turn-1]);
+          if (characters[0].hp <= 0) {
+            set_dead(0);
+          }
+          if (characters[3].hp <= 0) {
+            set_dead(3);
+          }
+          if (dead_characters[0] && dead_characters[3]) {
+            current_state = 16;
+            set_lane_info("current_state:" + current_state + " | GAME OVER", ["x","x","x","x","x"], ["x","x","x","x","x"]);
+            pending = true;
+            break;
+          }
+          if (dead_characters[0] || dead_characters[3]) {
+            current_state = 15;
+            set_lane_info("current_state:" + current_state + " | NEXT: LANE 3 - CRYSTAL ATTACK", ["x","x","x","x","x"], ["x","x","x","x","x"]);
+            document.getElementById("l-c_atk").innerHTML = "C_ATK " + characters[0].c_atk;
+            document.getElementById("r-c_atk").innerHTML = characters[3].c_atk + " C_ATK";
+            pending = true;
+            break;
+          }
+          if (turn == 4) {
+            if (characters[0].hp == characters[3].hp) {
+              current_state = 16;
+              set_lane_info("current_state:" + current_state + " | GAME OVER", ["x","x","x","x","x"], ["x","x","x","x","x"]);
+              pending = true;
+              break;
+            }
+
+            if (characters[0].hp < characters[3].hp) {
+              set_dead(0);
+            } else {
+              set_dead(3);
+            }
+            set_lane_info("current_state:" + current_state + " | NEXT: LANE 3 - CRYSTAL ATTACK", ["x","x","x","x","x"], ["x","x","x","x","x"]);
+          } else {
+            set_lane_info("current_state:" + current_state + " | NEXT: LANE 3 - TURN " + (turn + 1), get_info_array(0, turn + 1), get_info_array(3, turn + 1));
+          }
+          document.getElementById("l-c_atk").innerHTML = "C_ATK " + characters[0].c_atk;
+          document.getElementById("r-c_atk").innerHTML = characters[3].c_atk + " C_ATK";
+          current_state ++;
+          pending = true;
+          break;
+        case "3c":
+          if (dead_characters[0]) {
+            characters[3].gotoAndPlay("attack");
+            crystal_hp_text[0].text = parseInt(crystal_hp_text[0].text) - characters[3].c_atk;
+          } else {
+            characters[0].gotoAndPlay("attack");
+            crystal_hp_text[1].text = parseInt(crystal_hp_text[1].text) - characters[0].c_atk;
+          }
+          set_lane_info("current_state:" + current_state + " | GAME OVER", ["x","x","x","x","x"], ["x","x","x","x","x"]);
+          current_state ++;
+          pending = true;
+          break;
+
+      }
+      return;
+    }
+
+    function set_dead(i) {
+      var tmp_x = characters[i].x;
+      var tmp_y = characters[i].y;
+      stage.removeChild(characters[i]);
+      stage.removeChild(info_text[i]);
+      dead_characters[i] = new createjs.Sprite(dead_sheet);
+      stage.addChild(dead_characters[i]);
+      dead_characters[i].framerate = 25;
+      dead_characters[i].scaleX = 0.3 * (i <= 2 ? 1 : -1);
+      dead_characters[i].scaleY = 0.3;
+      dead_characters[i].x = tmp_x - 100 * (i <= 2 ? 1 : -1);
+      dead_characters[i].y = tmp_y;
+      dead_characters[i].gotoAndPlay("dead");
+    }
+
+    function execute_fight (c1, c2, cmd1, cmd2) {
+      switch(cmd1 + cmd2) {
+        case "DD":
+        case "CC":
+        case "DC":
+        case "CD":
+          break;
+        case "AA":
+          c1.gotoAndPlay("attack");
+          c2.gotoAndPlay("attack");
+          if (c1.atk > c2.def) {
+            c2.hp -= c1.atk - c2.def;
+          }
+          if (c2.atk > c1.def) {
+            c1.hp -= c2.atk - c1.def;
+          }
+          break;
+        case "UU":
+          c1.gotoAndPlay("attack");
+          c2.gotoAndPlay("attack");
+          if (Math.round(c1.atk * game_data["atk_raise"]) > c2.def) {
+            c2.hp -= Math.round(c1.atk * game_data["atk_raise"]) - c2.def;
+          }
+          if (Math.round(c2.atk * game_data["atk_raise"]) > c1.def) {
+            c1.hp -= Math.round(c2.atk * game_data["atk_raise"]) - c1.def;
+          }
+          break;
+        case "AD":
+        case "DA":
+          var atker, defer;
+          if (cmd1 + cmd2 == "AD") {
+            atker = c1;
+            defer = c2;
+          } else {
+            atker = c2;
+            defer = c1;
+          }
+          atker.gotoAndPlay("attack");
+          if (atker.atk > Math.round(defer.def * game_data["def_raise"])) {
+            defer.hp -= atker.atk - Math.round(defer.def * game_data["def_raise"]);
+          }
+          break;
+        case "AC":
+        case "CA":
+          var atker, counter;
+          if (cmd1 + cmd2 == "AC") {
+            atker = c1;
+            counter = c2;
+          } else {
+            atker = c2;
+            counter = c1;
+          }
+          atker.gotoAndPlay("attack");
+          if (atker.atk > counter.def) {
+            counter.hp -= atker.atk - counter.def;
+          }
+          break;
+        case "AU":
+        case "UA":
+          var ulter, atker;
+          if (cmd1 + cmd2 == "AU") {
+            ulter = c2;
+            atker = c1;
+          } else {
+            ulter = c1;
+            atker = c2;
+          }
+          ulter.gotoAndPlay("attack");
+          if (Math.round(ulter.atk*game_data["atk_raise"]) > atker.def) {
+            atker.hp -= Math.round(ulter.atk*game_data["atk_raise"]) - atker.def;
+          }
+          break;
+        case "CU":
+        case "UC":
+          var counter, ulter;
+          if (cmd1 + cmd2 == "CU") {
+            counter = c1;
+            ulter = c2;
+          } else {
+            counter = c2;
+            ulter = c1;
+          }
+          counter.gotoAndPlay("attack");
+          if (Math.round(counter.atk*game_data["atk_raise"]) > ulter.def) {
+            ulter.hp -= Math.round(counter.atk*game_data["atk_raise"]) - ulter.def;
+          }
+          break;
+        case "DU":
+        case "UD":
+          var defer, ulter;
+          if (cmd1 + cmd2 == "DU") {
+            defer = c1;
+            ulter = c2;
+          } else {
+            defer = c2;
+            ulter = c1;
+          }
+          ulter.gotoAndPlay("attack");
+          if (Math.round(ulter.atk*game_data["atk_raise"]) > Math.round(defer.def * game_data["def_raise"])) {
+            defer.hp -= Math.round(ulter.atk*game_data["atk_raise"]) - Math.round(defer.def * game_data["def_raise"]);
+          }
+          break;
+      }
+    }
+
+    function show_options() {
+      var x = document.getElementById("options");
+      if (x.style.display === "none") {
+        x.style.display = "block";
+      } else {
+        x.style.display = "none";
+      }
+    }
+
+    function set_options() {
+      if (current_state != 0) {
+        alert("Now playing!!!");
+        return;
+      }
+      for (var i=0; i<=5; i++) {
+        characters[i].hp = parseInt(document.getElementById("character_hp_" + i).value);
+        characters[i].atk = parseInt(document.getElementById("character_atk_" + i).value);
+        characters[i].c_atk = parseInt(document.getElementById("character_c_atk_" + i).value);
+        characters[i].def = parseInt(document.getElementById("character_def_" + i).value);
+        characters[i].cmd = document.getElementById("character_cmd_" + i).value;
+      }
+    }
+
+    function play_turn() {
+      pending = false;
+    }
+
+    function set_lane_info(title, l_info, r_info) {
+      document.getElementById("lane-info-title").innerHTML = title;
+      document.getElementById("l-hp").innerHTML = "HP " + l_info[0];
+      document.getElementById("l-atk").innerHTML = "ATK " + l_info[1];
+      document.getElementById("l-def").innerHTML = "DEF " + l_info[2];
+      document.getElementById("l-cmd").innerHTML = "CMD " + l_info[3];
+      document.getElementById("l-c_atk").innerHTML = "C_ATK " + l_info[4];
+      document.getElementById("r-hp").innerHTML = r_info[0] + " HP";
+      document.getElementById("r-atk").innerHTML = r_info[1] + " ATK";
+      document.getElementById("r-def").innerHTML = r_info[2] + " DEF";
+      document.getElementById("r-cmd").innerHTML = r_info[3] + " CMD";
+      document.getElementById("r-c_atk").innerHTML = r_info[4] + " C_ATK";
+    }
+  </script>
+</head>
+
+<body>
+  <div class="actions">
+    <span onClick="show_options()();" class="toggle-btn">TOGGLE INFO</span>
+    <span onClick="set_options();" class="toggle-btn">SET INFO</span>
+    <span onClick="play_turn();" class="toggle-btn">PLAY TURN</span>
+  </div>
+  <div id="options">
+    <div class="team-wrapper">
+      <span>JAPAN</span><br/>
+      <span>HP</span><input class="info-input" id="character_hp_2"></input>
+      <span>ATK</span><input class="info-input" id="character_atk_2"></input>
+      <span>C_ATK</span><input class="info-input" id="character_c_atk_2"></input>
+      <span>DEF</span><input class="info-input" id="character_def_2"></input>
+      <span>CMD</span><input class="info-input" id="character_cmd_2"></input>
+      <span class="role">LEADER</span><br/>
+      <span>HP</span><input class="info-input" id="character_hp_1"></input>
+      <span>ATK</span><input class="info-input" id="character_atk_1"></input>
+      <span>C_ATK</span><input class="info-input" id="character_c_atk_1"></input>
+      <span>DEF</span><input class="info-input" id="character_def_1"></input>
+      <span>CMD</span><input class="info-input" id="character_cmd_1"></input>
+      <span class="role">SUBLEADER</span><br/>
+      <span>HP</span><input class="info-input" id="character_hp_0"></input>
+      <span>ATK</span><input class="info-input" id="character_atk_0"></input>
+      <span>C_ATK</span><input class="info-input" id="character_c_atk_0"></input>
+      <span>DEF</span><input class="info-input" id="character_def_0"></input>
+      <span>CMD</span><input class="info-input" id="character_cmd_0"></input>
+      <span class="role">MEMBER</span>
+    </div>
+    <div class="team-wrapper right-team">
+      <span>VIETNAM</span><br/>
+      <span class="role">LEADER</span>
+      <span>HP</span><input class="info-input" id="character_hp_5"></input>
+      <span>ATK</span><input class="info-input" id="character_atk_5"></input>
+      <span>C_ATK</span><input class="info-input" id="character_c_atk_5"></input>
+      <span>DEF</span><input class="info-input" id="character_def_5"></input>
+      <span>CMD</span><input class="info-input" id="character_cmd_5"></input><br/>
+      <span class="role">SUBLEADER</span>
+      <span>HP</span><input class="info-input" id="character_hp_4"></input>
+      <span>ATK</span><input class="info-input" id="character_atk_4"></input>
+      <span>C_ATK</span><input class="info-input" id="character_c_atk_4"></input>
+      <span>DEF</span><input class="info-input" id="character_def_4"></input>
+      <span>CMD</span><input class="info-input" id="character_cmd_4"></input><br/>
+      <span class="role">MEMBER</span>
+      <span>HP</span><input class="info-input" id="character_hp_3"></input>
+      <span>ATK</span><input class="info-input" id="character_atk_3"></input>
+      <span>C_ATK</span><input class="info-input" id="character_c_atk_3"></input>
+      <span>DEF</span><input class="info-input" id="character_def_3"></input>
+      <span>CMD</span><input class="info-input" id="character_cmd_3"></input>
+    </div>
+    <div style="clear:both;text-align:center;"></div>
+  </div>
+  <div class="lane-info-wrapper">
+    <div id="lane-info-title" class="lane-info">NEXT TURN: PREPARING</div>
+    <div class="team-wrapper right-team">
+      <span class="lane-l-info" id="l-hp">HP x</span><br/>
+      <span class="lane-l-info" id="l-atk">ATK x</span><br/>
+      <span class="lane-l-info" id="l-def">DEF x</span><br/>
+      <span class="lane-l-info" id="l-cmd">CMD x</span><br/>
+      <span class="lane-l-info" id="l-c_atk">C_ATK x</span>
+    </div>
+    <div class="team-wrapper">
+      <span class="lane-r-info" id="r-hp">x HP</span><br/>
+      <span class="lane-r-info" id="r-atk">x ATK</span><br/>
+      <span class="lane-r-info" id="r-def">x DEF</span><br/>
+      <span class="lane-r-info" id="r-cmd">x CMD</span><br/>
+      <span class="lane-r-info" id="r-c_atk">x C_ATK</span>
+    </div>
+    <div style="clear:both;text-align:center;"></div>
+  </div>
+  <div style="text-align: center;">
+    <canvas id="gameCanvas" width="1280" height="720"></canvas>
+  </div>
+</body>
+</html>
