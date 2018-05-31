@@ -77,15 +77,15 @@
   <script src="../createjs.min.js"></script>
   <script>
     function random_interger(min, range) {
-      return Math.round(Math.random() * range + min);
+      return Math.round(Math.random() * range + min) * 5;
     }
     var game_data = {
-      init_hp: [random_interger(50, 10), random_interger(50, 10), random_interger(50, 10), random_interger(50, 10), random_interger(50, 10), random_interger(50, 10)],
-      atk: [random_interger(20, 5), random_interger(20, 5), random_interger(20, 5), random_interger(20, 5), random_interger(20, 5), random_interger(20, 5), random_interger(20, 5), random_interger(20, 5)],
-      c_atk: [random_interger(20, 5), random_interger(20, 5), random_interger(20, 5), random_interger(20, 5), random_interger(20, 5), random_interger(20, 5), random_interger(20, 5), random_interger(20, 5)],
-      def: [random_interger(20, 5), random_interger(20, 5), random_interger(20, 5), random_interger(20, 5), random_interger(20, 5), random_interger(20, 5), random_interger(20, 5), random_interger(20, 5)],
+      init_hp: [random_interger(10, 5), random_interger(10, 5), random_interger(10, 5), random_interger(10, 5), random_interger(10, 5), random_interger(10, 5)],
+      atk: [random_interger(5, 5), random_interger(5, 5), random_interger(5, 5), random_interger(5, 5), random_interger(5, 5), random_interger(5, 5), random_interger(5, 5), random_interger(5, 5)],
+      c_atk: [random_interger(3, 4), random_interger(3, 4), random_interger(3, 4), random_interger(3, 4), random_interger(3, 4), random_interger(3, 4), random_interger(3, 4), random_interger(3, 4)],
+      def: [random_interger(3, 4), random_interger(3, 4), random_interger(3, 4), random_interger(3, 4), random_interger(3, 4), random_interger(3, 4), random_interger(3, 4), random_interger(3, 4)],
       cmd: ["ADCU".split('').sort(function(){return 0.5-Math.random()}).join(''),"ADCU".split('').sort(function(){return 0.5-Math.random()}).join(''),"ADCU".split('').sort(function(){return 0.5-Math.random()}).join(''),"ADCU".split('').sort(function(){return 0.5-Math.random()}).join(''),"ADCU".split('').sort(function(){return 0.5-Math.random()}).join(''),"ADCU".split('').sort(function(){return 0.5-Math.random()}).join('')],
-      crystal_hp: [random_interger(50, 50), random_interger(50, 50)],
+      crystal_hp: [random_interger(20, 10), random_interger(20, 10)],
       def_raise: 2,
       atk_raise: 2
     }
@@ -298,10 +298,10 @@
         case "1c":
           if (dead_characters[2]) {
             characters[5].gotoAndPlay("attack");
-            crystal_hp_text[0].text = parseInt(crystal_hp_text[0].text) - characters[5].c_atk;
+            game_data["crystal_hp"][0] -= characters[5].c_atk;
           } else {
             characters[2].gotoAndPlay("attack");
-            crystal_hp_text[1].text = parseInt(crystal_hp_text[1].text) - characters[2].c_atk;
+            game_data["crystal_hp"][1] -= characters[2].c_atk;
           }
           set_lane_info("current_state:" + current_state + " | NEXT: LANE 2 - TURN 1", get_info_array(1, 1), get_info_array(4, 1));
           current_state ++;
@@ -359,10 +359,10 @@
         case "2c":
           if (dead_characters[1]) {
             characters[4].gotoAndPlay("attack");
-            crystal_hp_text[0].text = parseInt(crystal_hp_text[0].text) - characters[4].c_atk;
+            game_data["crystal_hp"][0] -= characters[4].c_atk;
           } else {
             characters[1].gotoAndPlay("attack");
-            crystal_hp_text[1].text = parseInt(crystal_hp_text[1].text) - characters[1].c_atk;
+            game_data["crystal_hp"][1] -= characters[1].c_atk;
           }
           set_lane_info("current_state:" + current_state + " | NEXT: LANE 3 - TURN 1", get_info_array(1, 1), get_info_array(4, 1));
           current_state ++;
@@ -420,10 +420,10 @@
         case "3c":
           if (dead_characters[0]) {
             characters[3].gotoAndPlay("attack");
-            crystal_hp_text[0].text = parseInt(crystal_hp_text[0].text) - characters[3].c_atk;
+            game_data["crystal_hp"][0] -= characters[3].c_atk;
           } else {
             characters[0].gotoAndPlay("attack");
-            crystal_hp_text[1].text = parseInt(crystal_hp_text[1].text) - characters[0].c_atk;
+            game_data["crystal_hp"][1] -= characters[0].c_atk;
           }
           set_lane_info("current_state:" + current_state + " | GAME OVER", ["x","x","x","x","x"], ["x","x","x","x","x"]);
           current_state ++;
