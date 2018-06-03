@@ -547,8 +547,8 @@
             ulter = c1;
           }
           ulter.gotoAndPlay("attack");
-          if (Math.round(ulter.atk*game_data["atk_raise"]) > defer.def) {
-            defer.hp -= Math.round(ulter.atk*game_data["atk_raise"]) - defer.def;
+          if (Math.round(ulter.atk*game_data["atk_raise"]) > Math.round(defer.def*game_data["def_raise"])) {
+            defer.hp -= Math.round(ulter.atk*game_data["atk_raise"]) - Math.round(defer.def*game_data["def_raise"]);
           }
           break;
       }
