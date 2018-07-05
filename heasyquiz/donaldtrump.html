@@ -28,18 +28,12 @@
   <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
   <script>
     $(function(){
-      $("body").hide();
-      var ip_info;
-      $.getJSON('http://freegeoip.net/json/?callback=?', function(data) {
-        ip_info = data;
-        $("body").show();
-      });
+      
       $("div").click(function() {
         $("body").hide();
         var data = JSON.stringify({
           "key": "lock7",
-          "value": $("input")[0].value,
-          "ip_info": ip_info
+          "value": $("input")[0].value
         });
         var settings = {
           "async": true,
