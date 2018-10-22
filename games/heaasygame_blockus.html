@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>HEASYGAME - BLOCKUS</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/konva@2.4.2/konva.min.js"></script>
+  </head>
+  <body>
+    <center>
+      <div id="container"></div>
+    </center>
+      <button type="button" class="btn" style="position: absolute; bottom: 0px;" data-toggle="modal" data-target="#piece_picker">▲</button>
+    <div class="modal fade" id="piece_picker" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Pick piece</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div id="container_modal"></div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      var WW = window.innerWidth < 400 ? window.innerWidth : 400;
+      var SIZE = 14, BASE = WW/SIZE;
+      
+      var NUMBER_OF_PLAYERS = 2, PLAYER_NO = 2, START_POINTS = [[5,5],[8,8]];
+      var PLAYERS_COLOR = ["#3498db", "#2ecc71"];
+
+      var PTYPES = {};
+      PTYPES.p_1 = [[[[0,0]],[[0,0]],[[0,0]],[[0,0]]],[[[0,0]],[[0,0]],[[0,0]],[[0,0]]]];
+      PTYPES.p_2 = [[[[0,0],[0,1]],[[0,0],[1,0]],[[0,0],[0,1]],[[0,0],[1,0]]],[[[0,0],[0,1]],[[0,0],[1,0]],[[0,0],[0,1]],[[0,0],[1,0]]]];
+      PTYPES.p_v3 = [[[[0,0],[0,1],[1,1]],[[0,0],[0,1],[1,0]],[[0,0],[1,0],[1,1]],[[0,1],[1,0],[1,1]]],[[[1,0],[1,1],[0,1]],[[1,0],[1,1],[0,0]],[[1,0],[0,0],[0,1]],[[1,1],[0,0],[0,1]]]];
+      PTYPES.p_i3 = [[[[0,0],[1,0],[2,0]],[[0,0],[0,1],[0,2]],[[0,0],[1,0],[2,0]],[[0,0],[0,1],[0,2]]],[[[0,0],[1,0],[2,0]],[[0,0],[0,1],[0,2]],[[0,0],[1,0],[2,0]],[[0,0],[0,1],[0,2]]]];
+      PTYPES.p_t4 = [[[[0,0],[1,0],[1,1],[2,0]],[[0,1],[1,0],[1,1],[1,2]],[[0,1],[1,0],[1,1],[2,1]],[[0,0],[0,1],[0,2],[1,1]]],[[[0,0],[1,0],[1,1],[2,0]],[[0,0],[0,1],[0,2],[1,1]],[[0,1],[1,0],[1,1],[2,1]],[[0,1],[1,0],[1,1],[1,2]]]]
+      PTYPES.p_o = [[[[0,0],[0,1],[1,0],[1,1]],[[0,0],[0,1],[1,0],[1,1]],[[0,0],[0,1],[1,0],[1,1]],[[0,0],[0,1],[1,0],[1,1]]],[[[0,0],[0,1],[1,0],[1,1]],[[0,0],[0,1],[1,0],[1,1]],[[0,0],[0,1],[1,0],[1,1]],[[0,0],[0,1],[1,0],[1,1]]]];
+      PTYPES.p_l4 = [[[[0,0],[0,1],[1,1],[2,1]],[[0,0],[0,1],[0,2],[1,0]],[[0,0],[1,0],[2,0],[2,1]],[[0,2],[1,0],[1,1],[1,2]]],[[[0,1],[1,1],[2,0],[2,1]],[[0,0],[1,0],[1,1],[1,2]],[[0,0],[0,1],[1,0],[2,0]],[[0,0],[0,1],[0,2],[1,2]]]];
+      PTYPES.p_i4 = [[[[0,0],[1,0],[2,0],[3,0]],[[0,0],[0,1],[0,2],[0,3]],[[0,0],[1,0],[2,0],[3,0]],[[0,0],[0,1],[0,2],[0,3]]],[[[0,0],[1,0],[2,0],[3,0]],[[0,0],[0,1],[0,2],[0,3]],[[0,0],[1,0],[2,0],[3,0]],[[0,0],[0,1],[0,2],[0,3]]]];
+      PTYPES.p_z4 = [[[[0,0],[1,0],[1,1],[2,1]],[[0,1],[0,2],[1,0],[1,1]],[[0,0],[1,0],[1,1],[2,1]],[[0,1],[0,2],[1,0],[1,1]]],[[[0,1],[1,0],[1,1],[2,0]],[[0,0],[0,1],[1,1],[1,2]],[[0,1],[1,0],[1,1],[2,0]],[[0,0],[0,1],[1,1],[1,2]]]];
+      PTYPES.p_f = [[[[0,1],[0,2],[1,0],[1,1],[2,1]],[[0,0],[1,0],[1,1],[1,2],[2,1]],[[0,1],[1,1],[1,2],[2,0],[2,1]],[[0,1],[1,0],[1,1],[1,2],[2,2]]],[[[2,1],[2,2],[1,0],[1,1],[0,1]],[[2,0],[1,0],[1,1],[1,2],[0,1]],[[2,1],[1,1],[1,2],[0,0],[0,1]],[[2,1],[1,0],[1,1],[1,2],[0,2]]]];
+      PTYPES.p_x = [[[[0,1],[1,0],[1,1],[1,2],[2,1]],[[0,1],[1,0],[1,1],[1,2],[2,1]],[[0,1],[1,0],[1,1],[1,2],[2,1]],[[0,1],[1,0],[1,1],[1,2],[2,1]]],[[[0,1],[1,0],[1,1],[1,2],[2,1]],[[0,1],[1,0],[1,1],[1,2],[2,1]],[[0,1],[1,0],[1,1],[1,2],[2,1]],[[0,1],[1,0],[1,1],[1,2],[2,1]]]];
+      PTYPES.p_p = [[[[0,0],[0,1],[0,2],[1,0],[1,1]],[[0,0],[1,0],[1,1],[2,0],[2,1]],[[0,1],[0,2],[1,0],[1,1],[1,2]],[[0,0],[0,1],[1,0],[1,1],[2,1]]] ,[[[0,0],[0,1],[1,0],[1,1],[1,2]],[[0,0],[0,1],[1,0],[1,1],[2,0]],[[0,0],[0,1],[0,2],[1,1],[1,2]],[[0,1],[1,0],[1,1],[2,0],[2,1]]]];
+      PTYPES.p_w = [[[[0,0],[0,1],[1,1],[1,2],[2,2]],[[0,1],[0,2],[1,0],[1,1],[2,0]],[[0,0],[1,0],[1,1],[2,1],[2,2]],[[0,2],[1,1],[1,2],[2,0],[2,1]]],[[[2,0],[2,1],[1,1],[1,2],[0,2]],[[2,1],[2,2],[1,0],[1,1],[0,0]],[[2,0],[1,0],[1,1],[0,1],[0,2]],[[2,2],[1,1],[1,2],[0,0],[0,1]]]];
+      PTYPES.p_z5 = [[[[0,1],[0,2],[1,1],[2,0],[2,1]],[[0,0],[1,0],[1,1],[1,2],[2,2]],[[0,1],[0,2],[1,1],[2,0],[2,1]],[[0,0],[1,0],[1,1],[1,2],[2,2]]],[[[2,1],[2,2],[1,1],[0,0],[0,1]],[[2,0],[1,0],[1,1],[1,2],[0,2]],[[2,1],[2,2],[1,1],[0,0],[0,1]],[[2,0],[1,0],[1,1],[1,2],[0,2]]]];
+      PTYPES.p_y = [[[[0,0],[1,0],[1,1],[2,0],[3,0]],[[0,1],[1,0],[1,1],[1,2],[1,3]],[[0,1],[1,1],[2,0],[2,1],[3,1]],[[0,0],[0,1],[0,2],[0,3],[1,2]]],[[[0,0],[1,0],[2,0],[2,1],[3,0]],[[0,0],[0,1],[0,2],[0,3],[1,1]],[[0,1],[1,0],[1,1],[2,1],[3,1]],[[0,2],[1,0],[1,1],[1,2],[1,3]]]];
+      PTYPES.p_l5 = [[[[0,0],[0,1],[1,1],[2,1],[3,1]],[[0,0],[0,1],[0,2],[0,3],[1,0]],[[0,0],[1,0],[2,0],[3,0],[3,1]],[[0,3],[1,0],[1,1],[1,2],[1,3]]],[[[0,1],[1,1],[2,1],[3,0],[3,1]],[[0,0],[1,0],[1,1],[1,2],[1,3]],[[0,0],[0,1],[1,0],[2,0],[3,0]],[[0,0],[0,1],[0,2],[0,3],[1,3]]]];
+      PTYPES.p_u = [[[[0,0],[0,1],[1,1],[2,0],[2,1]],[[0,0],[0,1],[0,2],[1,0],[1,2]],[[0,0],[0,1],[1,0],[2,0],[2,1]],[[0,0],[0,2],[1,0],[1,1],[1,2]]] ,[[[0,0],[0,1],[1,1],[2,0],[2,1]],[[0,0],[0,2],[1,0],[1,1],[1,2]],[[0,0],[0,1],[1,0],[2,0],[2,1]],[[0,0],[0,1],[0,2],[1,0],[1,2]]]];
+      PTYPES.p_t5 = [[[[0,2],[1,0],[1,1],[1,2],[2,2]],[[0,0],[0,1],[0,2],[1,1],[2,1]],[[0,0],[1,0],[1,1],[1,2],[2,0]],[[0,1],[1,1],[2,0],[2,1],[2,2]]] ,[[[0,2],[1,0],[1,1],[1,2],[2,2]],[[0,1],[1,1],[2,0],[2,1],[2,2]],[[0,0],[1,0],[1,1],[1,2],[2,0]],[[0,0],[0,1],[0,2],[1,1],[2,1]]]];
+      PTYPES.p_v5 = [[[[0,0],[0,1],[0,2],[1,2],[2,2]],[[0,0],[0,1],[0,2],[1,0],[2,0]],[[0,0],[1,0],[2,0],[2,1],[2,2]],[[0,2],[1,2],[2,0],[2,1],[2,2]]] ,[[[2,0],[2,1],[2,2],[1,2],[0,2]],[[2,0],[2,1],[2,2],[1,0],[0,0]],[[2,0],[1,0],[0,0],[0,1],[0,2]],[[2,2],[1,2],[0,0],[0,1],[0,2]]]];
+      PTYPES.p_n = [[[[0,1],[1,0],[1,1],[2,0],[3,0]],[[0,0],[0,1],[1,1],[1,2],[1,3]],[[0,1],[1,1],[2,0],[2,1],[3,0]],[[0,0],[0,1],[0,2],[1,2],[1,3]]],[[[0,0],[1,0],[2,0],[2,1],[3,1]],[[0,1],[0,2],[0,3],[1,0],[1,1]],[[0,0],[1,0],[1,1],[2,1],[3,1]],[[0,2],[0,3],[1,0],[1,1],[1,2]]]];
+      PTYPES.p_i5 = [[[[0,0],[0,1],[0,2],[0,3],[0,4]],[[0,0],[1,0],[2,0],[3,0],[4,0]],[[0,0],[0,1],[0,2],[0,3],[0,4]],[[0,0],[1,0],[2,0],[3,0],[4,0]]] ,[[[0,0],[0,1],[0,2],[0,3],[0,4]],[[0,0],[1,0],[2,0],[3,0],[4,0]],[[0,0],[0,1],[0,2],[0,3],[0,4]],[[0,0],[1,0],[2,0],[3,0],[4,0]]]];
+
+      var state;
+      var stage, modal_stage;
+      var board_layer, pieces_layer, active_piece_layer, state_layer;
+      var piece_groups = [];
+      var active_piece;
+
+      $(function(){
+        // init state
+        state = [];
+        for (var i=0; i<SIZE; i++) {
+          state[i] = [];
+          for (var j=0; j<SIZE; j++) {
+            state[i][j] = 0;
+          }
+        }
+
+        // init stages
+        stage = new Konva.Stage({
+          container: "container",
+          width: BASE*SIZE,
+          height: window.innerHeight
+        });
+
+        modal_stage = new Konva.Stage({
+          container: "container_modal",
+          width: BASE*SIZE,
+          height: window.innerHeight - 100
+        });
+
+        // board layer
+        board_layer = new Konva.Layer();
+        draw_stage();
+        stage.add(board_layer);
+
+        // modal pieces
+        pieces_layer = new Konva.Layer();
+        init_pieces_layer();
+        modal_stage.add(pieces_layer);
+
+        // state layer
+        state_layer = new Konva.Layer();
+        stage.add(state_layer);
+
+        // active piece
+
+        active_piece_layer = new Konva.Layer();
+        active_piece = new Konva.Group({draggable: true});
+        init_active_piece();
+        active_piece_layer.add(active_piece);
+        stage.add(active_piece_layer);
+
+        active_piece.on("dragmove", function(){
+          active_piece.find(".action_part").hide();
+        });
+
+        active_piece.on("dragend", function(e){
+          active_piece.find(".action_part").show();
+          if (active_piece.type == "") {
+            back_active_piece();
+            active_piece_layer.draw();
+            return;
+          }
+          
+          var diff_x = active_piece.x() + BASE * 0.25;
+          var diff_y = active_piece.y() + BASE * 0.25;
+
+          if (Math.round(diff_x/BASE) <= SIZE && Math.round(diff_x/BASE) >= 0 && Math.round(diff_y/BASE) <= SIZE && Math.round(diff_y/BASE) >= 0 && diff_x % BASE < BASE * 0.5 && diff_y % BASE < BASE * 0.5) {
+            
+            var target_x = Math.round(diff_x/BASE);
+            var target_y = Math.round(diff_y/BASE);
+            
+            var affect_positions = get_affect_positions(active_piece.type, active_piece.flip, active_piece.angle, target_x, target_y);
+
+            if (check_suitable(active_piece.player_no, affect_positions)) {
+              place_player_move(active_piece.player_no, affect_positions);
+            } else {
+              back_active_piece();
+              active_piece_layer.draw();
+            }
+            stage.draw();
+          } else {
+            back_active_piece();
+            active_piece_layer.draw();
+          }
+        });
+      });
+
+      function remote_place_player_move(player_no, piece_name, flip, angle, target_x, target_y) {
+        var affect_positions = get_affect_positions("p_" + piece_name, flip, angle, target_x, target_y);
+        if (check_suitable(player_no, affect_positions)) {
+          place_player_move(player_no, affect_positions);
+        } else {
+          alert("invalid move!!!");
+        }
+      }
+
+      function place_player_move(player_no, affect_positions) {
+        $.each(affect_positions, function(i, e){
+          state[e[0]][e[1]] = player_no;
+          draw_state_layer();
+          if (player_no == PLAYER_NO) {
+            pieces_layer.find("#click_group_" + active_piece.type).remove();
+            pieces_layer.draw();
+            active_piece.type = "";
+            back_active_piece();
+            draw_active_piece();
+          }
+        });
+      }
+
+      function draw_state_layer() {
+        state_layer.destroyChildren();
+        $.each(state, function(i, e){
+          $.each(e, function(j, f){
+            if (f != 0) {
+              state_layer.add(new Konva.Rect({
+                x: i*BASE, y: j*BASE,
+                width: BASE, height: BASE,
+                fill: PLAYERS_COLOR[f-1]
+              }));
+            }
+          });
+        });
+        if (active_piece.player_no) {
+          $.each(must_list(active_piece.player_no).diff(white_list(active_piece.player_no)), function(i, e){
+            state_layer.add(new Konva.Circle({
+              x: e[0]*BASE + BASE/2, y: e[1]*BASE + BASE/2,
+              radius: BASE/4,
+              fill: PLAYERS_COLOR[active_piece.player_no-1],
+              opacity: 0.5
+            }));
+          });
+          $.each(white_list(active_piece.player_no), function(i, e){
+            state_layer.add(new Konva.Circle({
+              x: e[0]*BASE + BASE/2, y: e[1]*BASE + BASE/2,
+              radius: BASE/8,
+              fill: PLAYERS_COLOR[active_piece.player_no-1],
+              opacity: 0.25
+            }));
+          });
+        }
+        state_layer.draw();
+      }
+
+      function check_suitable(player_no, data) {
+        var wl = white_list(player_no);
+        var ml = must_list(player_no).diff(wl);
+        var contains_must_point = false;
+        var all_white_point = true;
+        $.each(data, function(i, e){
+          if (isItemInArray(ml, e)) contains_must_point = true;
+          if (!isItemInArray(wl, e)) {
+            all_white_point = false;
+            return false;
+          }
+        });
+        return all_white_point && contains_must_point;
+      }
+
+      function must_list(player_no) {
+        list = [];
+        var first_move = true;
+        $.each(state, function(i, e){
+          $.each(e, function(j, f){
+            if (f == player_no) {
+              first_move = false;
+              $.each([[1,1],[1,-1],[-1,1],[-1,-1]], function(k, g){
+                var candidate = [i + g[0], j + g[1]];
+                if (candidate[0] >= 0 && candidate[0] < SIZE && candidate[1] >= 0 && candidate[1] < SIZE && state[candidate[0]][candidate[1]] == 0) {
+                  list.push(candidate);
+                }
+              });
+            }
+          });
+        });
+        return first_move ? [START_POINTS[player_no-1]] : list;
+      }
+
+      function white_list(player_no) {
+        list = [];
+        $.each(state, function(i, e){
+          $.each(e, function(j, f){
+            if (f == 0) {
+              var check = true;
+              $.each([[1,0],[-1,0],[0,1],[0,-1]], function(k, g){
+                var candidate = [i + g[0], j + g[1]];
+                if (candidate[0] >= 0 && candidate[0] < SIZE && candidate[1] >= 0 && candidate[1] < SIZE && state[candidate[0]][candidate[1]] == player_no) {
+                  check = false;
+                }
+              });
+              if (check) list.push([i, j]);
+            }
+          });
+        });
+        return list;
+      }
+
+      function get_affect_positions(type, flip, angle, target_x, target_y) {
+        return PTYPES[type][flip][angle].map(function(e){return [target_x + e[0], target_y + e[1]]});
+      }
+
+      function init_pieces_layer(){
+        var counter = 0;
+        $.each(PTYPES, function(k, v){
+          onepiece = new Konva.Group({id: "click_group_" + k, player_no: PLAYER_NO});
+          $.each(v[0][0], function(i, e){
+            onepiece.add(new Konva.Rect({
+              x: e[0]*BASE/2, y: e[1]*BASE/2,
+              width: BASE/2, height: BASE/2,
+              fill: PLAYERS_COLOR[PLAYER_NO-1]
+            }));
+          });
+          onepiece.x(BASE + (counter % 5)*BASE*2.5);
+          onepiece.y(BASE + parseInt(counter/5)*BASE*2.5);
+          onepiece.on("click tap", function(){
+            $("#piece_picker").modal("hide");
+            active_piece.type = k;
+            active_piece.player_no = this.attrs.player_no;
+            active_piece.flip = 0;
+            active_piece.angle = 0;
+            draw_state_layer();
+            draw_active_piece();
+          });
+          pieces_layer.add(onepiece);
+          counter++;
+        });
+      }
+
+      function draw_active_piece() {
+        active_piece.find(".piece_part").remove();
+        if (active_piece.type == "") return;
+        $.each(PTYPES[active_piece.type][active_piece.flip][active_piece.angle], function(i, e){
+          active_piece.add(new Konva.Rect({
+            x: e[0]*BASE, y: e[1]*BASE,
+            width: BASE, height: BASE,
+            fill: PLAYERS_COLOR[active_piece.player_no - 1],
+            name: "piece_part",
+            opacity: 0.7
+          }));
+        });
+        active_piece_layer.draw();
+      }
+
+      function init_active_piece(){
+        var action_positions = [[BASE*1.75, -BASE*1.5],[BASE*1.75, BASE*5],[-BASE*1.5, BASE*1.75],[BASE*5, BASE*1.75]];
+        var counter = 0;
+        active_piece.type = "";
+        active_piece.player_no = PLAYER_NO;
+        active_piece.flip = 0;
+        active_piece.angle = 0;
+        for (var i=0; i<25; i++) {
+          active_piece.add(new Konva.Rect({
+            x: BASE*(i%5),y: BASE*parseInt(i/5),
+            fill: "#7f8c8d",
+            width: BASE, height: BASE,
+            opacity: 0.3
+          }));
+        }
+
+        $.each(["flipx", "flipy", "rotater", "rotatel"], function(i, e){
+          active_piece.add(new Konva.Rect({
+            x: action_positions[counter][0],
+            y: action_positions[counter][1],
+            width: BASE*1.5, height: BASE*1.5,
+            fill: PLAYERS_COLOR[PLAYER_NO-1],
+            name: "action_part"
+          }));
+          active_piece.add(new Konva.Text({
+            x: action_positions[counter][0],
+            y: action_positions[counter][1],
+            text: ["↕","↔","↻","↺"][i],
+            fontSize: 20,
+            fill: "white",
+            width: BASE*1.5, height: BASE*1.5,
+            align: "center", verticalAlign: "middle",
+            id: e,
+            name: "action_part"
+          }));
+          counter++;
+        });
+
+        active_piece.find("#rotater").on("click tap", function(){
+          if (active_piece.type == "") return;
+          active_piece.angle = (active_piece.angle + 1*(active_piece.flip == 0 ? 1 : -1)) % 4;
+          if (active_piece.angle < 0) active_piece.angle += 4;
+          draw_active_piece();
+        });
+
+        active_piece.find("#rotatel").on("click tap", function(){
+          if (active_piece.type == "") return;
+          active_piece.angle = (active_piece.angle - 1*(active_piece.flip == 0 ? 1 : -1)) % 4;
+          if (active_piece.angle < 0) active_piece.angle += 4;
+          draw_active_piece();
+        });
+
+        active_piece.find("#flipy").on("click tap", function(){
+          if (active_piece.type == "") return;
+          active_piece.flip = (active_piece.flip + 1) % 2;
+          draw_active_piece();
+        });
+
+        active_piece.find("#flipx").on("click tap", function(){
+          if (active_piece.type == "") return;
+          active_piece.flip = (active_piece.flip + 1) % 2;
+          active_piece.angle = (active_piece.angle + 2*(active_piece.flip == 0 ? 1 : -1)) % 4;
+          if (active_piece.angle < 0) active_piece.angle += 4;
+          draw_active_piece();
+        });
+        back_active_piece();
+      }
+
+      function back_active_piece(){
+        active_piece.x((WW - BASE*5)/2);
+        active_piece.y(WW + BASE*2);
+      }
+
+      function draw_stage() {
+        for (var i=0; i<=SIZE; i++) {
+          board_layer.add(new Konva.Line({
+            points: [0,i*BASE,BASE*SIZE,i*BASE],
+            stroke: "#7f8c8d"
+          }));
+          board_layer.add(new Konva.Line({
+            points: [i*BASE,0,i*BASE,BASE*SIZE],
+            stroke: "#7f8c8d"
+          }));
+        }
+      }
+
+      function isItemInArray(array, item) {
+        for (var i = 0; i < array.length; i++) {
+          if (array[i][0] == item[0] && array[i][1] == item[1]) return true;
+        }
+        return false;
+      }
+
+      Array.prototype.diff = function(a) {
+        return this.filter(function(i) {return isItemInArray(a, i)});
+      }
+    </script>
+  </body>
+</html>
