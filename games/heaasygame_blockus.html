@@ -261,18 +261,18 @@
       }
 
       function init_pieces_layer(){
-        var counter = 0;
+        var counter = 0, best_base = 26;
         $.each(PTYPES, function(k, v){
           onepiece = new Konva.Group({id: "click_group_" + k, player_no: PLAYER_NO});
           $.each(v[0][0], function(i, e){
             onepiece.add(new Konva.Rect({
-              x: e[0]*BASE/2, y: e[1]*BASE/2,
-              width: BASE/2, height: BASE/2,
+              x: e[0]*best_base/2, y: e[1]*best_base/2,
+              width: best_base/2, height: best_base/2,
               fill: PLAYERS_COLOR[PLAYER_NO-1]
             }));
           });
-          onepiece.x(BASE + (counter % 5)*BASE*2.5);
-          onepiece.y(BASE + parseInt(counter/5)*BASE*2.5);
+          onepiece.x(best_base + (counter % 5)*best_base*2.5);
+          onepiece.y(best_base + parseInt(counter/5)*best_base*2.5);
           onepiece.on("click tap", function(){
             $("#piece_picker").modal("hide");
             active_piece.type = k;
