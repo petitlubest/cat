@@ -122,8 +122,8 @@
             return;
           }
           
-          var diff_x = active_piece.x() + BASE * 0.25;
-          var diff_y = active_piece.y() + BASE * 0.25;
+          var diff_x = active_piece.x() + active_piece.p_x + BASE * 0.25;
+          var diff_y = active_piece.y() + active_piece.p_y + BASE * 0.25;
 
           if (Math.round(diff_x/BASE) <= SIZE && Math.round(diff_x/BASE) >= 0 && Math.round(diff_y/BASE) <= SIZE && Math.round(diff_y/BASE) >= 0 && diff_x % BASE < BASE * 0.5 && diff_y % BASE < BASE * 0.5) {
             
@@ -279,6 +279,8 @@
             active_piece.player_no = this.attrs.player_no;
             active_piece.flip = 0;
             active_piece.angle = 0;
+            active_piece.p_x = 0;
+            active_piece.p_y = 0;
             draw_state_layer();
             draw_active_piece();
           });
@@ -290,16 +292,39 @@
       function draw_active_piece() {
         active_piece.find(".piece_part").remove();
         if (active_piece.type == "") return;
-        $.each(PTYPES[active_piece.type][active_piece.flip][active_piece.angle], function(i, e){
-          active_piece.add(new Konva.Rect({
+        var points = PTYPES[active_piece.type][active_piece.flip][active_piece.angle];
+        var size = get_size_info(points);
+        var p_x = BASE*(5-size[0])/2;
+        var p_y = BASE*(5-size[1])/2;
+        active_piece.p_x = p_x;
+        active_piece.p_y = p_y;
+        var piece_part = new Konva.Group({
+          x: p_x + size[0]*BASE/2, y: p_y + size[1]*BASE/2,
+          name: "piece_part",
+          offset: {
+            x: size[0]*BASE/2,
+            y: size[1]*BASE/2
+          }
+        });
+        $.each(points, function(i, e){
+          piece_part.add(new Konva.Rect({
             x: e[0]*BASE, y: e[1]*BASE,
             width: BASE, height: BASE,
             fill: PLAYERS_COLOR[active_piece.player_no - 1],
-            name: "piece_part",
             opacity: 0.7
           }));
         });
+        active_piece.add(piece_part);
         active_piece_layer.draw();
+      }
+
+      function get_size_info(points) {
+        var w=0, h=0;
+        $.each(points, function(i,e){
+          if (e[0] + 1 > w) w = e[0] + 1;
+          if (e[1] + 1 > h) h = e[1] + 1;
+        });
+        return [w, h]
       }
 
       function init_active_piece(){
@@ -342,30 +367,62 @@
 
         active_piece.find("#rotater").on("click tap", function(){
           if (active_piece.type == "") return;
+          var rotater_tween = new Konva.Tween({
+            node: active_piece.find(".piece_part")[0],
+            duration: 0.1,
+            rotation: 90
+          });
           active_piece.angle = (active_piece.angle + 1*(active_piece.flip == 0 ? 1 : -1)) % 4;
           if (active_piece.angle < 0) active_piece.angle += 4;
-          draw_active_piece();
+          rotater_tween.play();
+          setTimeout(function() {
+            draw_active_piece();
+          }, 110);
         });
 
         active_piece.find("#rotatel").on("click tap", function(){
           if (active_piece.type == "") return;
+          var rotatel_tween = new Konva.Tween({
+            node: active_piece.find(".piece_part")[0],
+            duration: 0.1,
+            rotation: -90
+          });
           active_piece.angle = (active_piece.angle - 1*(active_piece.flip == 0 ? 1 : -1)) % 4;
+          rotatel_tween.play();
           if (active_piece.angle < 0) active_piece.angle += 4;
-          draw_active_piece();
+          setTimeout(function() {
+            draw_active_piece();
+          }, 110);
         });
 
         active_piece.find("#flipy").on("click tap", function(){
           if (active_piece.type == "") return;
+          var flipy_tween = new Konva.Tween({
+            node: active_piece.find(".piece_part")[0],
+            duration: 0.1,
+            scaleX: -1
+          });
           active_piece.flip = (active_piece.flip + 1) % 2;
-          draw_active_piece();
+          flipy_tween.play();
+          setTimeout(function() {
+            draw_active_piece();
+          }, 110);
         });
 
         active_piece.find("#flipx").on("click tap", function(){
           if (active_piece.type == "") return;
+          var flipx_tween = new Konva.Tween({
+            node: active_piece.find(".piece_part")[0],
+            duration: 0.1,
+            scaleY: -1
+          });
           active_piece.flip = (active_piece.flip + 1) % 2;
           active_piece.angle = (active_piece.angle + 2*(active_piece.flip == 0 ? 1 : -1)) % 4;
           if (active_piece.angle < 0) active_piece.angle += 4;
-          draw_active_piece();
+          flipx_tween.play();
+          setTimeout(function() {
+            draw_active_piece();
+          }, 110);
         });
         back_active_piece();
       }
