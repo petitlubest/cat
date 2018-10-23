@@ -118,7 +118,7 @@
         });
       });
 
-      function check_and_place_active_piece() {
+      function check_and_place_active_piece(place) {
         var diff_x = active_piece.x() + active_piece.p_x + BASE * 0.25;
         var diff_y = active_piece.y() + active_piece.p_y + BASE * 0.25;
 
@@ -130,15 +130,17 @@
           var affect_positions = get_affect_positions(active_piece.type, active_piece.flip, active_piece.angle, target_x, target_y);
 
           if (check_suitable(active_piece.player_no, affect_positions)) {
-            place_player_move(active_piece.player_no, affect_positions);
-          } else {
-            back_active_piece();
-            active_piece_layer.draw();
+            if (place) {
+              place_player_move(active_piece.player_no, affect_positions);
+            } else {
+              active_piece.find(".square_piece_part").stroke("#2c3e50");
+              active_piece.find(".square_piece_part").dash([10, 10]);
+              active_piece.x(BASE*target_x - active_piece.p_x);
+              active_piece.y(BASE*target_y - active_piece.p_y);
+              active_piece_layer.draw();
+            }
           }
           stage.draw();
-        } else {
-          back_active_piece();
-          active_piece_layer.draw();
         }
       }
 
@@ -317,14 +319,16 @@
             x: e[0]*BASE, y: e[1]*BASE,
             width: BASE, height: BASE,
             fill: PLAYERS_COLOR[active_piece.player_no - 1],
-            opacity: 0.7
+            opacity: 0.7,
+            name: "square_piece_part"
           }));
         });
         piece_part.on("click tap", function(){
-          check_and_place_active_piece();
+          check_and_place_active_piece(true);
         });
         active_piece.add(piece_part);
         active_piece_layer.draw();
+        check_and_place_active_piece(false);
       }
 
       function get_size_info(points) {
@@ -372,6 +376,10 @@
             name: "action_part"
           }));
           counter++;
+        });
+
+        active_piece.on("dragend", function(){
+          check_and_place_active_piece(false);
         });
 
         active_piece.find("#rotater").on("click tap", function(){
