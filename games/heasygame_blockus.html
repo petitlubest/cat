@@ -119,6 +119,8 @@
       });
 
       function check_and_place_active_piece(place) {
+        if (active_piece.type == "") return;
+
         var diff_x = active_piece.x() + active_piece.p_x + BASE * 0.25;
         var diff_y = active_piece.y() + active_piece.p_y + BASE * 0.25;
 
