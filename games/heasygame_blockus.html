@@ -24,7 +24,7 @@
               <span aria-hidden="true">&times;</span>
             </button>
           </div>
-          <div id="container_modal"></div>
+          <center><div id="container_modal"></div></center>
         </div>
       </div>
     </div>
@@ -110,41 +110,47 @@
         active_piece_layer.add(active_piece);
         stage.add(active_piece_layer);
 
-        active_piece.on("dragmove", function(){
-          active_piece.find(".action_part").hide();
-        });
-
         active_piece.on("dragend", function(e){
-          active_piece.find(".action_part").show();
           if (active_piece.type == "") {
-            back_active_piece();
-            active_piece_layer.draw();
-            return;
-          }
-          
-          var diff_x = active_piece.x() + active_piece.p_x + BASE * 0.25;
-          var diff_y = active_piece.y() + active_piece.p_y + BASE * 0.25;
-
-          if (Math.round(diff_x/BASE) <= SIZE && Math.round(diff_x/BASE) >= 0 && Math.round(diff_y/BASE) <= SIZE && Math.round(diff_y/BASE) >= 0 && diff_x % BASE < BASE * 0.5 && diff_y % BASE < BASE * 0.5) {
-            
-            var target_x = Math.round(diff_x/BASE);
-            var target_y = Math.round(diff_y/BASE);
-            
-            var affect_positions = get_affect_positions(active_piece.type, active_piece.flip, active_piece.angle, target_x, target_y);
-
-            if (check_suitable(active_piece.player_no, affect_positions)) {
-              place_player_move(active_piece.player_no, affect_positions);
-            } else {
-              back_active_piece();
-              active_piece_layer.draw();
-            }
-            stage.draw();
-          } else {
             back_active_piece();
             active_piece_layer.draw();
           }
         });
       });
+
+      function check_and_place_active_piece() {
+        var diff_x = active_piece.x() + active_piece.p_x + BASE * 0.25;
+        var diff_y = active_piece.y() + active_piece.p_y + BASE * 0.25;
+
+        if (Math.round(diff_x/BASE) <= SIZE && Math.round(diff_x/BASE) >= 0 && Math.round(diff_y/BASE) <= SIZE && Math.round(diff_y/BASE) >= 0 && diff_x % BASE < BASE * 0.5 && diff_y % BASE < BASE * 0.5) {
+          
+          var target_x = Math.round(diff_x/BASE);
+          var target_y = Math.round(diff_y/BASE);
+          
+          var affect_positions = get_affect_positions(active_piece.type, active_piece.flip, active_piece.angle, target_x, target_y);
+
+          if (check_suitable(active_piece.player_no, affect_positions)) {
+            place_player_move(active_piece.player_no, affect_positions);
+          } else {
+            back_active_piece();
+            active_piece_layer.draw();
+          }
+          stage.draw();
+        } else {
+          back_active_piece();
+          active_piece_layer.draw();
+        }
+      }
+
+      function set_waitting_status(status) {
+        if (status) {
+          active_piece.hide();
+          active_piece_layer.draw();
+        } else {
+          active_piece.show();
+          active_piece_layer.draw();
+        }
+      }
 
       function remote_place_player_move(player_no, piece_name, flip, angle, target_x, target_y) {
         var affect_positions = get_affect_positions("p_" + piece_name, flip, angle, target_x, target_y);
@@ -261,18 +267,18 @@
       }
 
       function init_pieces_layer(){
-        var counter = 0, best_base = 26;
+        var counter = 0, best_base = (BASE*SIZE/27);
         $.each(PTYPES, function(k, v){
           onepiece = new Konva.Group({id: "click_group_" + k, player_no: PLAYER_NO});
           $.each(v[0][0], function(i, e){
             onepiece.add(new Konva.Rect({
-              x: e[0]*best_base/2, y: e[1]*best_base/2,
-              width: best_base/2, height: best_base/2,
+              x: e[0]*best_base, y: e[1]*best_base,
+              width: best_base, height: best_base,
               fill: PLAYERS_COLOR[PLAYER_NO-1]
             }));
           });
-          onepiece.x(best_base + (counter % 5)*best_base*2.5);
-          onepiece.y(best_base + parseInt(counter/5)*best_base*2.5);
+          onepiece.x(best_base + (counter % 5)*best_base*5);
+          onepiece.y(best_base + parseInt(counter/5)*best_base*5);
           onepiece.on("click tap", function(){
             $("#piece_picker").modal("hide");
             active_piece.type = k;
@@ -314,6 +320,9 @@
             opacity: 0.7
           }));
         });
+        piece_part.on("click tap", function(){
+          check_and_place_active_piece();
+        });
         active_piece.add(piece_part);
         active_piece_layer.draw();
       }
@@ -348,7 +357,7 @@
             x: action_positions[counter][0],
             y: action_positions[counter][1],
             width: BASE*1.5, height: BASE*1.5,
-            fill: PLAYERS_COLOR[PLAYER_NO-1],
+            fill: "#7f8c8d",
             name: "action_part"
           }));
           active_piece.add(new Konva.Text({
