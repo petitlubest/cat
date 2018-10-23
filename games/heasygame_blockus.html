@@ -111,7 +111,7 @@
         stage.add(active_piece_layer);
 
         active_piece.on("dragstart", function(e){
-          active_piece.find(".square_piece_part").dash([10, 10]);
+          active_piece.find(".square_piece_part").dash(null);
           active_piece_layer.draw();
         });
         
@@ -142,7 +142,7 @@
             if (place) {
               place_player_move(active_piece.player_no, affect_positions);
             } else {
-              active_piece.find(".square_piece_part").dash(null);
+              active_piece.find(".square_piece_part").dash([BASE/4, BASE/4]);
               active_piece.x(BASE*target_x - active_piece.p_x);
               active_piece.y(BASE*target_y - active_piece.p_y);
               active_piece_layer.draw();
@@ -330,7 +330,7 @@
             opacity: 0.7,
             name: "square_piece_part",
             stroke: "#2c3e50",
-            dash: [10, 10]
+            strokeWidth: 1
           }));
         });
         piece_part.on("click tap", function(){
