@@ -11,20 +11,33 @@
     <script src="https://unpkg.com/konva@2.4.2/konva.min.js"></script>
   </head>
   <body>
-    <center>
-      <div id="container"></div>
-    </center>
-      <button type="button" class="btn" style="position: absolute; bottom: 0px;" data-toggle="modal" data-target="#piece_picker">▲</button>
+    <div id="container"></div>
+    <button type="button" class="btn d-md-none" style="position: absolute; bottom: 0px;" data-toggle="modal" data-target="#piece_picker">▲</button>
     <div class="modal fade" id="piece_picker" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
       <div class="modal-dialog" role="document">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title" id="exampleModalLabel">Pick piece</h5>
+            <h5 class="modal-title" id="exampleModalLabel">Show & Pick pieces</h5>
             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
               <span aria-hidden="true">&times;</span>
             </button>
           </div>
-          <center><div id="container_modal"></div></center>
+          <ul class="nav nav-tabs nav-justified" role="tablist">
+            <li class="nav-item">
+              <a class="nav-link" id="player-1-tab" data-toggle="tab" href="#player1-pieces" role="tab" aria-controls="player1-pieces" aria-selected="true">PLAYER1</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link active" id="player-2-tab" data-toggle="tab" href="#player2-pieces" role="tab" aria-controls="player2-pieces" aria-selected="false">YOU</a>
+            </li>
+          </ul>
+          <div class="tab-content" id="myTabContent">
+            <div class="tab-pane fade" id="player1-pieces" role="tabpanel" aria-labelledby="player-1-tab">
+              <div id="container_modal_1"></div>
+            </div>
+            <div class="tab-pane fade show active" id="player2-pieces" role="tabpanel" aria-labelledby="player-2-tab">
+              <div id="container_modal_2"></div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -60,8 +73,8 @@
       PTYPES.p_i5 = [[[[0,0],[0,1],[0,2],[0,3],[0,4]],[[0,0],[1,0],[2,0],[3,0],[4,0]],[[0,0],[0,1],[0,2],[0,3],[0,4]],[[0,0],[1,0],[2,0],[3,0],[4,0]]] ,[[[0,0],[0,1],[0,2],[0,3],[0,4]],[[0,0],[1,0],[2,0],[3,0],[4,0]],[[0,0],[0,1],[0,2],[0,3],[0,4]],[[0,0],[1,0],[2,0],[3,0],[4,0]]]];
 
       var state;
-      var stage, modal_stage;
-      var board_layer, pieces_layer, active_piece_layer, state_layer;
+      var stage, modal_stage=[];
+      var board_layer, pieces_layer=[], active_piece_layer, state_layer;
       var piece_groups = [];
       var active_piece;
 
@@ -82,11 +95,13 @@
           height: window.innerHeight
         });
 
-        modal_stage = new Konva.Stage({
-          container: "container_modal",
-          width: BASE*SIZE,
-          height: window.innerHeight - 100
-        });
+        for (var i=0; i<NUMBER_OF_PLAYERS; i++) {
+          modal_stage[i] = new Konva.Stage({
+            container: "container_modal_" + (i+1),
+            width: BASE*SIZE,
+            height: window.innerHeight - 150
+          });
+        }
 
         // board layer
         board_layer = new Konva.Layer();
@@ -94,9 +109,11 @@
         stage.add(board_layer);
 
         // modal pieces
-        pieces_layer = new Konva.Layer();
-        init_pieces_layer();
-        modal_stage.add(pieces_layer);
+        for (var i=0; i<NUMBER_OF_PLAYERS; i++) {
+          pieces_layer[i] = new Konva.Layer();
+          init_pieces_layer(i+1);
+          modal_stage[i].add(pieces_layer[i]);
+        }
 
         // state layer
         state_layer = new Konva.Layer();
@@ -165,24 +182,27 @@
       function remote_place_player_move(player_no, piece_name, flip, angle, target_x, target_y) {
         var affect_positions = get_affect_positions("p_" + piece_name, flip, angle, target_x, target_y);
         if (check_suitable(player_no, affect_positions)) {
-          place_player_move(player_no, affect_positions);
+          place_player_move(player_no, affect_positions, piece_name);
         } else {
           alert("invalid move!!!");
         }
       }
 
-      function place_player_move(player_no, affect_positions) {
+      function place_player_move(player_no, affect_positions, piece_name="") {
         $.each(affect_positions, function(i, e){
           state[e[0]][e[1]] = player_no;
-          draw_state_layer();
-          if (player_no == PLAYER_NO) {
-            pieces_layer.find("#click_group_" + active_piece.type).remove();
-            pieces_layer.draw();
-            active_piece.type = "";
-            back_active_piece();
-            draw_active_piece();
-          }
         });
+        draw_state_layer();
+        if (player_no == PLAYER_NO) {
+          pieces_layer[player_no-1].find("#click_group_" + PLAYER_NO + "_" + active_piece.type).remove();
+          pieces_layer[player_no-1].draw();
+          active_piece.type = "";
+          back_active_piece();
+          draw_active_piece();
+        } else {
+          pieces_layer[player_no-1].find("#click_group_" + player_no + "_p_" + piece_name).remove();
+          pieces_layer[player_no-1].draw();
+        }
       }
 
       function draw_state_layer() {
@@ -276,31 +296,33 @@
         return PTYPES[type][flip][angle].map(function(e){return [target_x + e[0], target_y + e[1]]});
       }
 
-      function init_pieces_layer(){
+      function init_pieces_layer(no){
         var counter = 0, best_base = (BASE*SIZE/27);
         $.each(PTYPES, function(k, v){
-          onepiece = new Konva.Group({id: "click_group_" + k, player_no: PLAYER_NO});
+          onepiece = new Konva.Group({id: "click_group_" + no + "_" + k, player_no: no});
           $.each(v[0][0], function(i, e){
             onepiece.add(new Konva.Rect({
               x: e[0]*best_base, y: e[1]*best_base,
               width: best_base, height: best_base,
-              fill: PLAYERS_COLOR[PLAYER_NO-1]
+              fill: PLAYERS_COLOR[no-1]
             }));
           });
           onepiece.x(best_base + (counter % 5)*best_base*5);
           onepiece.y(best_base + parseInt(counter/5)*best_base*5);
-          onepiece.on("click tap", function(){
-            $("#piece_picker").modal("hide");
-            active_piece.type = k;
-            active_piece.player_no = this.attrs.player_no;
-            active_piece.flip = 0;
-            active_piece.angle = 0;
-            active_piece.p_x = 0;
-            active_piece.p_y = 0;
-            draw_state_layer();
-            draw_active_piece();
-          });
-          pieces_layer.add(onepiece);
+          if (no == PLAYER_NO) {
+            onepiece.on("click tap", function(){
+              $("#piece_picker").modal("hide");
+              active_piece.type = k;
+              active_piece.player_no = this.attrs.player_no;
+              active_piece.flip = 0;
+              active_piece.angle = 0;
+              active_piece.p_x = 0;
+              active_piece.p_y = 0;
+              draw_state_layer();
+              draw_active_piece();
+            });
+          }
+          pieces_layer[no-1].add(onepiece);
           counter++;
         });
       }
