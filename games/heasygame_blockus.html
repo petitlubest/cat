@@ -110,10 +110,17 @@
         active_piece_layer.add(active_piece);
         stage.add(active_piece_layer);
 
+        active_piece.on("dragstart", function(e){
+          active_piece.find(".square_piece_part").stroke(null);
+          active_piece_layer.draw();
+        });
+        
         active_piece.on("dragend", function(e){
           if (active_piece.type == "") {
             back_active_piece();
             active_piece_layer.draw();
+          } else {
+            check_and_place_active_piece(false);
           }
         });
       });
@@ -378,10 +385,6 @@
             name: "action_part"
           }));
           counter++;
-        });
-
-        active_piece.on("dragend", function(){
-          check_and_place_active_piece(false);
         });
 
         active_piece.find("#rotater").on("click tap", function(){
