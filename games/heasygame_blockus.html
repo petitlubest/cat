@@ -11,8 +11,28 @@
     <script src="https://unpkg.com/konva@2.4.2/konva.min.js"></script>
   </head>
   <body>
-    <div id="container"></div>
-    <button type="button" class="btn d-md-none" style="position: absolute; bottom: 0px;" data-toggle="modal" data-target="#piece_picker">▲</button>
+    <div style="float:left;">
+      <div id="container"></div>
+      <button type="button" class="btn d-md-none" style="position: absolute; bottom: 0px;" data-toggle="modal" data-target="#piece_picker">▲</button>
+    </div>
+    <div class="d-none d-md-block" style="float:left; border: 1px solid #7f8c8d;">
+      <ul class="nav nav-tabs nav-justified" role="tablist">
+        <li class="nav-item">
+          <a class="nav-link" id="pc-player-1-tab" data-toggle="tab" href="#pc-player1-pieces" role="tab" aria-controls="pc-player1-pieces" aria-selected="true">PLAYER1</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link active" id="pc-player-2-tab" data-toggle="tab" href="#pc-player2-pieces" role="tab" aria-controls="pc-player2-pieces" aria-selected="false">YOU</a>
+        </li>
+      </ul>
+      <div class="tab-content" id="myTabContent">
+        <div class="tab-pane fade" id="pc-player1-pieces" role="tabpanel" aria-labelledby="pc-player-1-tab">
+          <div id="pc_container_1"></div>
+        </div>
+        <div class="tab-pane fade show active" id="pc-player2-pieces" role="tabpanel" aria-labelledby="pc-player-2-tab">
+          <div id="pc_container_2"></div>
+        </div>
+      </div>
+    </div>
     <div class="modal fade" id="piece_picker" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
       <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -70,11 +90,11 @@
       PTYPES.p_t5 = [[[[0,2],[1,0],[1,1],[1,2],[2,2]],[[0,0],[0,1],[0,2],[1,1],[2,1]],[[0,0],[1,0],[1,1],[1,2],[2,0]],[[0,1],[1,1],[2,0],[2,1],[2,2]]] ,[[[0,2],[1,0],[1,1],[1,2],[2,2]],[[0,1],[1,1],[2,0],[2,1],[2,2]],[[0,0],[1,0],[1,1],[1,2],[2,0]],[[0,0],[0,1],[0,2],[1,1],[2,1]]]];
       PTYPES.p_v5 = [[[[0,0],[0,1],[0,2],[1,2],[2,2]],[[0,0],[0,1],[0,2],[1,0],[2,0]],[[0,0],[1,0],[2,0],[2,1],[2,2]],[[0,2],[1,2],[2,0],[2,1],[2,2]]] ,[[[2,0],[2,1],[2,2],[1,2],[0,2]],[[2,0],[2,1],[2,2],[1,0],[0,0]],[[2,0],[1,0],[0,0],[0,1],[0,2]],[[2,2],[1,2],[0,0],[0,1],[0,2]]]];
       PTYPES.p_n = [[[[0,1],[1,0],[1,1],[2,0],[3,0]],[[0,0],[0,1],[1,1],[1,2],[1,3]],[[0,1],[1,1],[2,0],[2,1],[3,0]],[[0,0],[0,1],[0,2],[1,2],[1,3]]],[[[0,0],[1,0],[2,0],[2,1],[3,1]],[[0,1],[0,2],[0,3],[1,0],[1,1]],[[0,0],[1,0],[1,1],[2,1],[3,1]],[[0,2],[0,3],[1,0],[1,1],[1,2]]]];
-      PTYPES.p_i5 = [[[[0,0],[0,1],[0,2],[0,3],[0,4]],[[0,0],[1,0],[2,0],[3,0],[4,0]],[[0,0],[0,1],[0,2],[0,3],[0,4]],[[0,0],[1,0],[2,0],[3,0],[4,0]]] ,[[[0,0],[0,1],[0,2],[0,3],[0,4]],[[0,0],[1,0],[2,0],[3,0],[4,0]],[[0,0],[0,1],[0,2],[0,3],[0,4]],[[0,0],[1,0],[2,0],[3,0],[4,0]]]];
+      PTYPES.p_i5 = [[[[0,0],[1,0],[2,0],[3,0],[4,0]],[[0,0],[0,1],[0,2],[0,3],[0,4]],[[0,0],[1,0],[2,0],[3,0],[4,0]],[[0,0],[0,1],[0,2],[0,3],[0,4]]] ,[[[0,0],[1,0],[2,0],[3,0],[4,0]],[[0,0],[0,1],[0,2],[0,3],[0,4]],[[0,0],[1,0],[2,0],[3,0],[4,0]],[[0,0],[0,1],[0,2],[0,3],[0,4]]]];
 
       var state;
-      var stage, modal_stage=[];
-      var board_layer, pieces_layer=[], active_piece_layer, state_layer;
+      var stage, modal_stage=[], pc_stage=[];
+      var board_layer, pieces_layer=[], pc_pieces_layer=[], active_piece_layer, state_layer;
       var piece_groups = [];
       var active_piece;
 
@@ -101,6 +121,12 @@
             width: BASE*SIZE,
             height: window.innerHeight - 150
           });
+
+          pc_stage[i] = new Konva.Stage({
+            container: "pc_container_" + (i+1),
+            width: BASE*SIZE,
+            height: BASE*SIZE - 43
+          });          
         }
 
         // board layer
@@ -113,6 +139,10 @@
           pieces_layer[i] = new Konva.Layer();
           init_pieces_layer(i+1);
           modal_stage[i].add(pieces_layer[i]);
+
+          pc_pieces_layer[i] = new Konva.Layer();
+          init_pc_pieces_layer(i+1);
+          pc_stage[i].add(pc_pieces_layer[i]);          
         }
 
         // state layer
@@ -195,13 +225,17 @@
         draw_state_layer();
         if (player_no == PLAYER_NO) {
           pieces_layer[player_no-1].find("#click_group_" + PLAYER_NO + "_" + active_piece.type).remove();
+          pc_pieces_layer[player_no-1].find("#click_group_" + PLAYER_NO + "_" + active_piece.type).remove();
           pieces_layer[player_no-1].draw();
+          pc_pieces_layer[player_no-1].draw();
           active_piece.type = "";
           back_active_piece();
           draw_active_piece();
         } else {
           pieces_layer[player_no-1].find("#click_group_" + player_no + "_p_" + piece_name).remove();
+          pc_pieces_layer[player_no-1].find("#click_group_" + player_no + "_p_" + piece_name).remove();
           pieces_layer[player_no-1].draw();
+          pc_pieces_layer[player_no-1].draw();
         }
       }
 
@@ -323,6 +357,37 @@
             });
           }
           pieces_layer[no-1].add(onepiece);
+          counter++;
+        });
+      }
+
+      function init_pc_pieces_layer(no){
+        var counter = 0, best_base = (BASE*SIZE/27);
+        $.each(PTYPES, function(k, v){
+          onepiece = new Konva.Group({id: "click_group_" + no + "_" + k, player_no: no});
+          $.each(v[0][0], function(i, e){
+            onepiece.add(new Konva.Rect({
+              x: e[0]*best_base, y: e[1]*best_base,
+              width: best_base, height: best_base,
+              fill: PLAYERS_COLOR[no-1]
+            }));
+          });
+          onepiece.x(best_base + (counter % 5)*best_base*5);
+          onepiece.y(best_base + parseInt(counter/5)*best_base*5);
+          if (no == PLAYER_NO) {
+            onepiece.on("click tap", function(){
+              $("#piece_picker").modal("hide");
+              active_piece.type = k;
+              active_piece.player_no = this.attrs.player_no;
+              active_piece.flip = 0;
+              active_piece.angle = 0;
+              active_piece.p_x = 0;
+              active_piece.p_y = 0;
+              draw_state_layer();
+              draw_active_piece();
+            });
+          }
+          pc_pieces_layer[no-1].add(onepiece);
           counter++;
         });
       }
