@@ -18,10 +18,10 @@
     <div class="d-none d-md-block" style="float:left; border: 1px solid #7f8c8d;">
       <ul class="nav nav-tabs nav-justified" role="tablist">
         <li class="nav-item">
-          <a class="nav-link" id="pc-player-1-tab" data-toggle="tab" href="#pc-player1-pieces" role="tab" aria-controls="pc-player1-pieces" aria-selected="true"><span class="player-turn" id="player1-turn"></span>vigov5<span class="player1-score">(0)</span></a>
+          <a class="nav-link" id="pc-player-1-tab" data-toggle="tab" href="#pc-player1-pieces" role="tab" aria-controls="pc-player1-pieces" aria-selected="true"><span class="player-turn player1-turn"></span>vigov5<span class="player1-score">(0)</span></a>
         </li>
         <li class="nav-item">
-          <a class="nav-link active" id="pc-player-2-tab" data-toggle="tab" href="#pc-player2-pieces" role="tab" aria-controls="pc-player2-pieces" aria-selected="false"><span class="player-turn" id="player2-turn">●</span>bs90<span class="player2-score">(0)</span></a>
+          <a class="nav-link active" id="pc-player-2-tab" data-toggle="tab" href="#pc-player2-pieces" role="tab" aria-controls="pc-player2-pieces" aria-selected="false"><span class="player-turn player2-turn">●</span>bs90<span class="player2-score">(0)</span></a>
         </li>
       </ul>
       <div class="tab-content" id="myTabContent">
@@ -44,10 +44,10 @@
           </div>
           <ul class="nav nav-tabs nav-justified" role="tablist">
             <li class="nav-item">
-              <a class="nav-link" id="player-1-tab" data-toggle="tab" href="#player1-pieces" role="tab" aria-controls="player1-pieces" aria-selected="true"><span class="player-turn" id="player1-turn"></span>vigov5<span class="player1-score">(0)</span></a>
+              <a class="nav-link" id="player-1-tab" data-toggle="tab" href="#player1-pieces" role="tab" aria-controls="player1-pieces" aria-selected="true"><span class="player-turn player1-turn"></span>vigov5<span class="player1-score">(0)</span></a>
             </li>
             <li class="nav-item">
-              <a class="nav-link active" id="player-2-tab" data-toggle="tab" href="#player2-pieces" role="tab" aria-controls="player2-pieces" aria-selected="false"><span class="player-turn" id="player2-turn">●</span>bs90<span class="player2-score">(0)</span></a>
+              <a class="nav-link active" id="player-2-tab" data-toggle="tab" href="#player2-pieces" role="tab" aria-controls="player2-pieces" aria-selected="false"><span class="player-turn player2-turn">●</span>bs90<span class="player2-score">(0)</span></a>
             </li>
           </ul>
           <div class="tab-content" id="myTabContent">
@@ -174,7 +174,8 @@
 
       function set_current_player(no) {
         $(".player-turn").html("");
-        $("#player" + no + "-turn").html("●");
+        $(".player" + no + "-turn").html("●");
+        no == PLAYER_NO ? set_waitting_status(false) : set_waitting_status(true);
       }
 
       function check_and_place_active_piece(place) {
