@@ -219,7 +219,7 @@
       }
 
       function remote_place_player_move(player_no, piece_name, flip, angle, target_x, target_y) {
-        var affect_positions = get_affect_positions("p_" + piece_name, flip, angle, target_x, target_y);
+        var affect_positions = get_affect_positions(piece_name, flip, angle, target_x, target_y);
         if (check_suitable(player_no, affect_positions)) {
           place_player_move(player_no, affect_positions, piece_name);
         } else {
@@ -244,7 +244,7 @@
         } else {
           pieces_layer[player_no-1].find("#click_group_" + player_no + "_p_" + piece_name).remove();
           pc_pieces_layer[player_no-1].find("#pc_click_group_" + player_no + "_p_" + piece_name).remove();
-          remaining_pieces[player_no-1] = remaining_pieces[player_no-1].filter(function(e){return e != "p_" + piece_name});
+          remaining_pieces[player_no-1] = remaining_pieces[player_no-1].filter(function(e){return e != piece_name});
           pieces_layer[player_no-1].draw();
           pc_pieces_layer[player_no-1].draw();
         }
