@@ -91,14 +91,18 @@
       PTYPES.p_v5 = [[[[0,0],[0,1],[0,2],[1,2],[2,2]],[[0,0],[0,1],[0,2],[1,0],[2,0]],[[0,0],[1,0],[2,0],[2,1],[2,2]],[[0,2],[1,2],[2,0],[2,1],[2,2]]] ,[[[2,0],[2,1],[2,2],[1,2],[0,2]],[[2,0],[2,1],[2,2],[1,0],[0,0]],[[2,0],[1,0],[0,0],[0,1],[0,2]],[[2,2],[1,2],[0,0],[0,1],[0,2]]]];
       PTYPES.p_n = [[[[0,1],[1,0],[1,1],[2,0],[3,0]],[[0,0],[0,1],[1,1],[1,2],[1,3]],[[0,1],[1,1],[2,0],[2,1],[3,0]],[[0,0],[0,1],[0,2],[1,2],[1,3]]],[[[0,0],[1,0],[2,0],[2,1],[3,1]],[[0,1],[0,2],[0,3],[1,0],[1,1]],[[0,0],[1,0],[1,1],[2,1],[3,1]],[[0,2],[0,3],[1,0],[1,1],[1,2]]]];
       PTYPES.p_i5 = [[[[0,0],[1,0],[2,0],[3,0],[4,0]],[[0,0],[0,1],[0,2],[0,3],[0,4]],[[0,0],[1,0],[2,0],[3,0],[4,0]],[[0,0],[0,1],[0,2],[0,3],[0,4]]] ,[[[0,0],[1,0],[2,0],[3,0],[4,0]],[[0,0],[0,1],[0,2],[0,3],[0,4]],[[0,0],[1,0],[2,0],[3,0],[4,0]],[[0,0],[0,1],[0,2],[0,3],[0,4]]]];
-
+      
       var state;
       var stage, modal_stage=[], pc_stage=[];
       var board_layer, pieces_layer=[], pc_pieces_layer=[], active_piece_layer, state_layer;
-      var piece_groups = [];
-      var active_piece;
+      var active_piece, remaining_pieces=[];
 
       $(function(){
+        // init remaining pieces
+        for (var i=0; i<NUMBER_OF_PLAYERS; i++) {
+          remaining_pieces[i] = Object.keys(PTYPES);
+        }
+
         // init state
         state = [];
         for (var i=0; i<SIZE; i++) {
@@ -150,7 +154,6 @@
         stage.add(state_layer);
 
         // active piece
-
         active_piece_layer = new Konva.Layer();
         active_piece = new Konva.Group({draggable: true});
         init_active_piece();
@@ -232,6 +235,7 @@
         if (player_no == PLAYER_NO) {
           pieces_layer[PLAYER_NO-1].find("#click_group_" + PLAYER_NO + "_" + active_piece.type).remove();
           pc_pieces_layer[PLAYER_NO-1].find("#pc_click_group_" + PLAYER_NO + "_" + active_piece.type).remove();
+          remaining_pieces[PLAYER_NO-1] = remaining_pieces[PLAYER_NO-1].filter(function(e){return e != active_piece.type});
           pieces_layer[PLAYER_NO-1].draw();
           pc_pieces_layer[PLAYER_NO-1].draw();
           active_piece.type = "";
@@ -240,6 +244,7 @@
         } else {
           pieces_layer[player_no-1].find("#click_group_" + player_no + "_p_" + piece_name).remove();
           pc_pieces_layer[player_no-1].find("#pc_click_group_" + player_no + "_p_" + piece_name).remove();
+          remaining_pieces[player_no-1] = remaining_pieces[player_no-1].filter(function(e){return e != "p_" + piece_name});
           pieces_layer[player_no-1].draw();
           pc_pieces_layer[player_no-1].draw();
         }
@@ -284,9 +289,29 @@
         state_layer.draw();
       }
 
-      function check_suitable(player_no, data) {
+      function moveable(player_no) {
         var wl = white_list(player_no);
         var ml = must_list(player_no).diff(wl);
+        for (var i=0;i<remaining_pieces[player_no-1].length;i++){
+          for (var f=0;f<=1;f++) {
+            for (var a=0;a<=3;a++) {
+              for (var tx=0;tx<SIZE;tx++) {
+                for (var ty=0;ty<SIZE;ty++) {
+                  var affect_positions = get_affect_positions(remaining_pieces[player_no-1][i], f, a, tx, ty);
+                  if (check_suitable(player_no, affect_positions, wl, ml)){
+                    return true;
+                  }
+                }  
+              }
+            }
+          }
+        }
+        return false;
+      }
+
+      function check_suitable(player_no, data, wl, ml) {
+        var wl = wl == null ? white_list(player_no) : wl;
+        var ml = ml == null ? must_list(player_no).diff(wl) : ml;
         var contains_must_point = false;
         var all_white_point = true;
         $.each(data, function(i, e){
