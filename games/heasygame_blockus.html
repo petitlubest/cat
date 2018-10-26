@@ -230,16 +230,16 @@
         });
         draw_state_layer();
         if (player_no == PLAYER_NO) {
-          pieces_layer[player_no-1].find("#click_group_" + PLAYER_NO + "_" + active_piece.type).remove();
-          pc_pieces_layer[player_no-1].find("#click_group_" + PLAYER_NO + "_" + active_piece.type).remove();
-          pieces_layer[player_no-1].draw();
-          pc_pieces_layer[player_no-1].draw();
+          pieces_layer[PLAYER_NO-1].find("#click_group_" + PLAYER_NO + "_" + active_piece.type).remove();
+          pc_pieces_layer[PLAYER_NO-1].find("#pc_click_group_" + PLAYER_NO + "_" + active_piece.type).remove();
+          pieces_layer[PLAYER_NO-1].draw();
+          pc_pieces_layer[PLAYER_NO-1].draw();
           active_piece.type = "";
           back_active_piece();
           draw_active_piece();
         } else {
           pieces_layer[player_no-1].find("#click_group_" + player_no + "_p_" + piece_name).remove();
-          pc_pieces_layer[player_no-1].find("#click_group_" + player_no + "_p_" + piece_name).remove();
+          pc_pieces_layer[player_no-1].find("#pc_click_group_" + player_no + "_p_" + piece_name).remove();
           pieces_layer[player_no-1].draw();
           pc_pieces_layer[player_no-1].draw();
         }
@@ -375,7 +375,7 @@
       function init_pc_pieces_layer(no){
         var counter = 0, best_base = (BASE*SIZE/27);
         $.each(PTYPES, function(k, v){
-          onepiece = new Konva.Group({id: "click_group_" + no + "_" + k, player_no: no});
+          onepiece = new Konva.Group({id: "pc_click_group_" + no + "_" + k, player_no: no});
           $.each(v[0][0], function(i, e){
             onepiece.add(new Konva.Rect({
               x: e[0]*best_base, y: e[1]*best_base,
