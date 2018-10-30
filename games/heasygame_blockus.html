@@ -13,7 +13,16 @@
       .modal-content {
         padding: 5px!important;
       }
-      
+
+      li.inactive {
+        float: left;
+        width: 20%;
+      }
+
+      li.active {
+        float: left;
+        width: 40%;
+      }
       @media (min-width: 768px) {
         .d-md-none {
           display: none!important;
@@ -34,9 +43,11 @@
       <a style="position: absolute; bottom: 0px;" class="waves-effect waves-light btn modal-trigger d-md-none" href="#piece_picker">▲</a>
     </div>
     <div class="d-none d-md-block" style="float:left; border: 1px solid #7f8c8d; width: 400px; height: 400px;">
-      <ul class="tabs row">
-        <li class="tab col s6"><a href="#pc-player1-pieces"><span class="player-turn player1-turn"></span>vigov5<span class="player1-score">(0)</span></a></li>
-        <li class="tab col s6"><a class="active" href="#pc-player2-pieces"><span class="player-turn player2-turn">●</span>bs90<span class="player2-score">(0)</span></a></li>
+      <ul class="tabs">
+        <li class="tab col inactive"><a href="#pc-player1-pieces" style="color: #3498db;"><span class="player-turn player1-turn"></span>vigov5<span class="player1-score">(0)</span></a></li>
+        <li class="tab col active"><a class="active" href="#pc-player2-pieces" style="color: #2ecc71;"><span class="player-turn player2-turn">●</span>bs90<span class="player2-score">(0)</span></a></li>
+        <li class="tab col inactive"><a href="#pc-player3-pieces" style="color: #8e44ad;"><span class="player-turn player3-turn"></span>ken<span class="player3-score">(0)</span></a></li>
+        <li class="tab col inactive"><a class="active" href="#pc-player4-pieces" style="color: #e74c3c;"><span class="player-turn player4-turn"></span>mugen<span class="player4-score">(0)</span></a></li>
       </ul>
       <div id="pc-player1-pieces">
         <div id="pc_container_1"></div>
@@ -44,13 +55,21 @@
       <div id="pc-player2-pieces">
         <div id="pc_container_2"></div>
       </div>
+      <div id="pc-player3-pieces">
+        <div id="pc_container_3"></div>
+      </div>
+      <div id="pc-player4-pieces">
+        <div id="pc_container_4"></div>
+      </div>
     </div>
     <div id="piece_picker" class="modal" style="width: 100%;">
       <div class="modal-content">
         <h5 style="text-align: center;">Show & Pick pieces</h5>
-        <ul class="tabs row">
-          <li class="tab col s6"><a href="#player1-pieces"><span class="player-turn player1-turn"></span>vigov5<span class="player1-score">(0)</span></a></li>
-          <li class="tab col s6"><a class="active" href="#player2-pieces"><span class="player-turn player2-turn">●</span>bs90<span class="player2-score">(0)</span></a></li>
+        <ul class="tabs">
+          <li class="tab col inactive"><a href="#player1-pieces" style="color: #3498db;"><span class="player-turn player1-turn"></span>vigov5<span class="player1-score">(0)</span></a></li>
+          <li class="tab col active"><a class="active" href="#player2-pieces" style="color: #2ecc71;"><span class="player-turn player2-turn">●</span>bs90<span class="player2-score">(0)</span></a></li>
+          <li class="tab col inactive"><a href="#player3-pieces" style="color: #8e44ad;"><span class="player-turn player3-turn"></span>ken<span class="player3-score">(0)</span></a></li>
+          <li class="tab col inactive"><a class="active" href="#player4-pieces" style="color: #e74c3c;"><span class="player-turn player4-turn"></span>mugen<span class="player4-score">(0)</span></a></li>
         </ul>
         <div id="player1-pieces">
           <div id="container_modal_1"></div>
@@ -58,15 +77,21 @@
         <div id="player2-pieces">
           <div id="container_modal_2"></div>
         </div>
+        <div id="player3-pieces">
+          <div id="container_modal_3"></div>
+        </div>
+        <div id="player4-pieces">
+          <div id="container_modal_4"></div>
+        </div>
       </div>
     </div>
 
     <script>
       var WW = window.innerWidth < 400 ? window.innerWidth : 400;
-      var SIZE = 14, BASE = WW/SIZE;
+      var SIZE = 20, BASE = WW/SIZE;
       
-      var NUMBER_OF_PLAYERS = 2, PLAYER_NO = 2, START_POINTS = [[5,5],[8,8]];
-      var PLAYERS_COLOR = ["#3498db", "#2ecc71"];
+      var NUMBER_OF_PLAYERS = 4, PLAYER_NO = 2, START_POINTS = [[0,0],[0,SIZE-1],[SIZE-1,SIZE-1],[SIZE-1,0]];
+      var PLAYERS_COLOR = ["#3498db", "#2ecc71", "#8e44ad", "#e74c3c"];
 
       var PTYPES = {};
       PTYPES.p_1 = [[[[0,0]],[[0,0]],[[0,0]],[[0,0]]],[[[0,0]],[[0,0]],[[0,0]],[[0,0]]]];
@@ -98,7 +123,12 @@
 
       $(function(){
         $(".modal").modal();
-        $(".tabs").tabs();
+        $(".tabs").tabs({
+          onShow: function(tab) {
+            $(tab).parent().find("li").removeClass("active").addClass("inactive");
+            $(tab).parent().find("a.active").parent().removeClass("inactive").addClass("active");
+          }
+        });
 
         // init remaining pieces
         for (var i=0; i<NUMBER_OF_PLAYERS; i++) {
